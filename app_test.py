@@ -19,19 +19,19 @@ FLAGS = flags.FLAGS
 def main(argv):
     del argv  # Unused.
     print("Hello these are your settings: ")
-    print(FLAGS.winlen)
-    print(FLAGS.winstep)
-    
+    print("Window length flag:", FLAGS.winlen)
+    print("Window step flag: ", FLAGS.winstep)
+
     dataset = TimitDataset(csv_file='test_data.csv',
                            root_dir='../timit',
-                           transform=MFCC(n_mfcc = FLAGS.n_mfcc, preemph = FLAGS.preemph))
+                           transform=MFCC(n_mfcc=FLAGS.n_mfcc, preemph=FLAGS.preemph))
 
     for i in range(len(dataset)):
         sample = dataset[i]
 
         audio = np.asarray(sample['audio'])[0]
 
-        print(audio.shape)
+        print("Audio shape: ", audio.shape)
 
         plt.pcolormesh(audio.T)
         plt.show()

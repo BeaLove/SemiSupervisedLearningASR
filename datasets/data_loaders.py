@@ -46,9 +46,7 @@ class TimitDataset(Dataset):
         path = os.path.splitext(path)[0]
 
         audio_name = path + '.WAV.wav'
-        #audio = torchaudio.load_wav(audio_name)
         audio, sample_rate = torchaudio.load(audio_name)
-        print(audio.size())
 
         phonemes_name = path + '.PHN'
 
@@ -58,7 +56,7 @@ class TimitDataset(Dataset):
 
         phonemes = list(phonemes)
 
-        sample = {'audio': audio, 'phonemes':  phonemes}
+        sample = {'audio': audio, 'phonemes':  phonemes} 
 
         if self.transform:
             sample = self.transform(sample)
