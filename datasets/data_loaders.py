@@ -6,6 +6,9 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torchaudio
 
+import ctypes
+import multiprocessing as mp
+
 # Ignore warnings
 import warnings
 warnings.filterwarnings("ignore")
@@ -27,6 +30,9 @@ class TimitDataset(Dataset):
 
         self.root_dir = root_dir
         self.transform = transform
+
+        self.use_cache = False
+        self.cache = {}
 
     def __len__(self):
         return len(self.audio_frame)

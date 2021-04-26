@@ -7,6 +7,8 @@ from scipy.io import wavfile
 import scipy.io
 import subprocess
 import torchaudio
+import matplotlib.pyplot as plt
+import numpy as np
 
 from datasets.data_loaders import TimitDataset
 from datasets.data_transformations import MFCC
@@ -19,24 +21,29 @@ def main(argv):
     print("Hello these are your settings: ")
     print(FLAGS.winlen)
     print(FLAGS.winstep)
-
+    
     dataset = TimitDataset(csv_file='test_data.csv',
                            root_dir='../timit',
-                           transform=MFCC())
+                           transform=MFCC(n_mfcc = FLAGS.n_mfcc, preemph = FLAGS.preemph))
 
     for i in range(len(dataset)):
         sample = dataset[i]
 
-        print(sample)
+        audio = np.asarray(sample['audio'])[0]
 
-        if i == 3:
+        print(audio.shape)
+
+        plt.pcolormesh(audio.T)
+        plt.show()
+
+        if i == 1:
             break
 
 
 if __name__ == '__main__':
     flags.DEFINE_float('winlen', 0.02, 'windowing length')
     flags.DEFINE_float('winstep', 0.01, 'Windowing step')
-    flags.DEFINE_integer('numcep', 13, 'Number of MFCC coefficients')
+    flags.DEFINE_integer('n_mfcc', 13, 'Number of MFCC coefficients')
     flags.DEFINE_integer('nfilt', 26, 'Number of filters')
     flags.DEFINE_float('preemph', 0.97, 'Preemphasis filter coefficient')
     app.run(main)
