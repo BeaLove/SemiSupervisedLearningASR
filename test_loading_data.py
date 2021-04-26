@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 import os
 from scipy.io import wavfile
-from sphfile import SPHFile
 import scipy.io
+import subprocess
 
 FLAGS = flags.FLAGS
 
@@ -22,11 +22,15 @@ def importFileInfo(filename, rootDir):
     print(df.head())
 
     audio_paths = df[df['is_audio'] == True]['path_from_data_dir']
-
+    path_to_converter = os.path.abspath(os.path.join(''sph2pipe.exe')
+    print("path to converter", path_to_converter)
     for path in list(audio_paths):
         print(os.path.abspath(path))
         #with path.open()
-        wavfile.read(os.path.normpath(os.path.join(rootDir, 'data', path)))
+        rif_path = path[:-4] + '_rif.wav'
+        print("new rif path ", rif_path)
+        subprocess.check_call([path_to_converter, path, rif_path])
+        wavfile.read(os.path.normpath(os.path.join(rootDir, 'data', rif_path)))
         break
 
 if __name__ == '__main__':
