@@ -1,14 +1,18 @@
-import torch
-import numpy as np
-import transform
+import torchaudio
 
-class preProcessing:
 
-    def __init__(self, config):
-        self.winlength = config.winlength
-        self.winstep = config.winstep
-        self.numcep = config.numcep
-        self.preemph = config.preemph
-        self.numfilt = config.numfilt
+class MFCC(object):
+    """Extract MFCC coefficients
 
-    def createMFCC(self, data):
+    Args:
+    """
+
+    def __init__(self):
+
+    def __call__(self, sample):
+        audio, phonemes = sample['audio'], sample['phonemes']
+
+        audio = torchaudio.transforms.MFCC(
+            sample_rate=16000, n_mfcc=40, dct_type=2, norm='ortho')
+
+        return {'audio': audio, 'phonemes': phonemes}
