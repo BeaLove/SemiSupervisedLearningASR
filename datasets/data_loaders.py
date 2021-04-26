@@ -39,8 +39,10 @@ class TimitDataset(Dataset):
                             self.audio_frame.iloc[idx]['path_from_data_dir'])
         path = os.path.splitext(path)[0]
 
-        audio_name = path + '.WAV'
-        audio = torchaudio.load(audio_name)
+        audio_name = path + '.WAV.wav'
+        #audio = torchaudio.load_wav(audio_name)
+        audio, sample_rate = torchaudio.load(audio_name)
+        print(audio.size())
 
         phonemes_name = path + '.PHN'
 
