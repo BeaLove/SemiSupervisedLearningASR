@@ -18,7 +18,7 @@ class TimitDataset(Dataset):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
-            root_dir (string): Directory with all the images.
+            root_dir (string): Directory with all the audio.
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
