@@ -18,22 +18,21 @@ FLAGS = flags.FLAGS
 
 def main(argv):
     del argv  # Unused.
-    print("Hello these are your settings: ")
-    print("Window length flag:", FLAGS.winlen)
-    print("Window step flag: ", FLAGS.winstep)
 
     dataset = TimitDataset(csv_file='test_data.csv',
                            root_dir='../timit',
-                           transform=MFCC(n_mfcc=FLAGS.n_mfcc, preemph=FLAGS.preemph))
+                           transform=MFCC(n_fft=FLAGS.n_fft,
+                                          preemphasis_coefficient=FLAGS.preemphasis_coefficient,
+                                          num_ceps=FLAGS.num_ceps))
 
     for i in range(len(dataset)):
         sample = dataset[i]
 
-        audio = np.asarray(sample['audio'])[0]
+        audio = np.asarray(sample['audio'])
 
         print("Audio shape: ", audio.shape)
 
-        plt.pcolormesh(audio.T)
+        plt.pcolormesh(audio)
         plt.show()
 
         if i == 1:
@@ -41,9 +40,10 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    flags.DEFINE_float('winlen', 0.02, 'windowing length')
-    flags.DEFINE_float('winstep', 0.01, 'Windowing step')
-    flags.DEFINE_integer('n_mfcc', 13, 'Number of MFCC coefficients')
-    flags.DEFINE_integer('nfilt', 26, 'Number of filters')
-    flags.DEFINE_float('preemph', 0.97, 'Preemphasis filter coefficient')
+    flags.DEFINE_integer('n_fft', 512, 'Size of FFT')
+    flags.DEFINE_float('preemphasis_coefficient', 0.97,
+                       'Coefficient for use in signal preemphasis')
+    flags.DEFINE_integer(
+        'num_ceps', 13, ' Number of cepstra in MFCC computation')
+
     app.run(main)

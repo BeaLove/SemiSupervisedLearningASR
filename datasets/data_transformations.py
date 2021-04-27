@@ -7,18 +7,31 @@ class MFCC(object):
     Args:
     """
 
-    def __init__(self, n_mfcc, preemph):
-        self.n_mfcc = n_mfcc
-        self.preemph = preemph
+    def __init__(self, n_fft, preemphasis_coefficient, num_ceps):
+        self.n_fft = n_fft
+        self.preemphasis_coefficient = preemphasis_coefficient
+        self.num_ceps = num_ceps
 
-    def __call__(self, sample):
+    def __call__(self, sample, sample_rate):
         audio, phonemes = sample['audio'], sample['phonemes']
 
-        mfcc_transform = torchaudio.transforms.MFCC(
-            sample_rate=16000, n_mfcc=self.n_mfcc)
+        frame_length = self.n_fft / sample_rate * 1000.0
+        frame_shift = frame_length / 2.0
 
-        audio = torchaudio.functional.lfilter(audio, torch.tensor(
-            [1.0, 0.0]), torch.tensor([1.0, -self.preemph]))
-        audio = mfcc_transform(audio)
+        params = {
+            "channel": 0,
+            "dither": 0.0,
+            "window_type": "hamming",
+            "frame_length": frame_length,
+            "frame_shift": frame_shift,
+            "remove_dc_offset": False,
+            "round_to_power_of_two": False,
+            "sample_frequency": sample_rate,
+            "preemphasis_coefficient": self.preemphasis_coefficient,
+            "num_ceps": self.num_ceps
+        }
+
+        audio = torch.tensor(audio, dtype=torch.float)
+        audio = torchaudio.compliance.kaldi.mfcc(audio, **params)
 
         return {'audio': audio, 'phonemes': phonemes}

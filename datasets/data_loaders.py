@@ -56,9 +56,9 @@ class TimitDataset(Dataset):
 
         phonemes = list(phonemes)
 
-        sample = {'audio': audio, 'phonemes':  phonemes} 
+        sample = {'audio': audio, 'phonemes':  phonemes}
 
         if self.transform:
-            sample = self.transform(sample)
+            sample = self.transform(sample, sample_rate)
 
         return sample
