@@ -3,7 +3,7 @@
 Experiments on semi-supervised learning for automatic speech recognition.
 
 Architectures:
-- LSTMs
+- LSTMs (maybe bi-directional)
 
 Dataset:
 - TIMIT
