@@ -47,7 +47,8 @@ class TimitDataset(Dataset):
 
         audio_name = path + '.WAV.wav'
         audio, sample_rate = torchaudio.load(audio_name)
-
+        #TODO: break up wav file according to phonemes in phn file
+            '''then do preprocessing to produce a 3D tensor of [phoneme, frames, mfcc]'''
         phonemes_name = path + '.PHN'
 
         with open(phonemes_name, 'r') as phonemes_file:
@@ -55,6 +56,9 @@ class TimitDataset(Dataset):
             phonemes = [[int(hd), int(tl), w] for (hd, tl, w) in phonemes]
 
         phonemes = list(phonemes)
+        #TODO return all phonemes in each sample as tensor
+        '''with each row corresponding to the correct phoneme, one-hot encoded
+        '''
 
         sample = {'audio': audio, 'phonemes':  phonemes}
 

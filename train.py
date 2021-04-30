@@ -1,3 +1,4 @@
+import torch.utils.data
 from absl import app
 from absl import flags
 from pathlib import Path
@@ -9,9 +10,10 @@ import subprocess
 import torchaudio
 import matplotlib.pyplot as plt
 import numpy as np
-
+from tqdm import tqdm
 from datasets.data_loaders import TimitDataset
 from datasets.data_transformations import MFCC
+from models.lstm import *
 
 FLAGS = flags.FLAGS
 
@@ -26,6 +28,16 @@ def main(argv):
                                           num_ceps=FLAGS.num_ceps))
 
     #Todo used for training the models
+num_phonemes = 44
+
+def train(num_epochs=1024, dataset):
+    model = LSTM(FLAGS.num_ceps, layers=[], num_phonemes=num_phonemes)
+    optimizer = torch.optim.Adam(model.parameters(), lr=)
+    train_loader = torch.utils.data.DataLoader(dataset, batch_size=16, num_workers=3, shuffle=True)
+    for epoch in tqdm(range(num_epochs), desc='training epochs'):
+
+        for batch in tqdm(train_loader, desc="training batches"):
+            optimizer
 
 
 
