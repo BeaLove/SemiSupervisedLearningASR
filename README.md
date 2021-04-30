@@ -7,12 +7,33 @@ Architectures:
 
 Dataset:
 - TIMIT
-- 
-### Install dependencies
+
+
+### Activate virtual environment
 
 ```bash
 python3 -m venv venv
 . venv/bin/activate
+```
+
+#### Using Anaconda in MacOS/Linux
+
+```bash
+conda create --name venv python=3.8 numpy
+source activate venv
+```
+
+
+#### Using Anaconda in Windows
+
+```bash
+conda create --name venv python=3.8 numpy scipy
+activate venv
+```
+
+### Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
