@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torchaudio
-
+import data_transformations
 import ctypes
 import multiprocessing as mp
 
@@ -46,23 +46,39 @@ class TimitDataset(Dataset):
         path = os.path.splitext(path)[0]
 
         audio_name = path + '.WAV.wav'
+
         audio, sample_rate = torchaudio.load(audio_name)
-        #TODO: break up wav file according to phonemes in phn file
-            '''then do preprocessing to produce a 3D tensor of [phoneme, frames, mfcc]'''
         phonemes_name = path + '.PHN'
 
         with open(phonemes_name, 'r') as phonemes_file:
-            phonemes = [l.strip().split(' ') for l in phonemes_file]
-            phonemes = [[int(hd), int(tl), w] for (hd, tl, w) in phonemes]
+            start = []
+            stop = []
+            phonemes = []
+            chunks = []
+            for l in phonemes_file:
+                phoneme = l.strip().split()
+                start.append(int(phoneme[0]))
+                stop.append(int(phoneme[1]))
+                chunks.append(int(phoneme[1]) - (phoneme[0]))
+                phonemes.append(phoneme[2])
 
-        phonemes = list(phonemes)
+        for i in range(len(phonemes)):
+            print("start {} stop {} phoneme {}".format(start[i], stop[i], phonemes[i]))
         #TODO return all phonemes in each sample as tensor
         '''with each row corresponding to the correct phoneme, one-hot encoded
         '''
-
+        split_audio = torch.split(audio, split_size_or_sections=chunks)
+        #TODO: enframe splits, encode target phonemes
         sample = {'audio': audio, 'phonemes':  phonemes}
 
         if self.transform:
             sample = self.transform(sample, sample_rate)
 
         return sample
+
+csv_filename = 'train_data.csv'
+root_dir = '../timit'
+
+dataset = TimitDataset(csv_file=csv_filename, root_dir=root_dir)
+sample = dataset.__getitem__(0)
+print(sample)
