@@ -14,6 +14,7 @@ import torch
 from datasets.data_loaders import TimitDataset
 from datasets.data_transformations import MFCC
 from datasets.corpus import *
+from datasets.phonemes import *
 
 FLAGS = flags.FLAGS
 
@@ -40,17 +41,11 @@ def main(argv):
     # Get the MFCC coefficients
     train_data = getMFCCFeatures(dataset)
 
-    # Toy example: loading phonemes for one audio file
-    phones_start_SA1, phones_stop_SA1, phonemes_SA1 = corpus.get_phone_transcription(example_file_dir)  # SA1.wav.WAV
-    phonemes_ids_SA1 = []
-    phonemes_ids_SA1_1hot = []
+    # Initialize a Phonemes object
+    audio_files_phonemes = Phonemes(corpus, dataset_dir)
     
-    # Indices of the phonemes
-    for phoneme in phonemes_SA1:
-        phonemes_ids_SA1.append(corpus.get_phones_ID(phoneme))
-        
-    # One-hot representation of the indices of the phonemes
-    phonemes_ids_SA1_1hot = corpus.phones_to_onehot(phonemes_SA1)
+    # Get the phonemes information
+    train_phonemes, test_phonemes = getPhonemesInformation(audio_files_phonemes)
     
 def getMFCCFeatures(dataset):
     """ This method computes the MFCC coefficients per frame.
@@ -74,7 +69,28 @@ def getMFCCFeatures(dataset):
             tensors.append(torch.tensor(audio_new.tolist(), dtype=torch.long))
     
     return tensors
+
+def  getPhonemesInformation(audio_files_phonemes):
+    """ This method loads the phonemes information.
+        It considers audio file in the training and test set.
+        @returns train_phonemes, test_phonemes
     
+                train_phonemes is a list of the following elements:
+                train_phonemes[i][0] = the directory of the i^th audio file
+                train_phonemes[i][1] = a list of the times every phoneme starts in the i^th audio file
+                train_phonemes[i][2] = a list of the times every phoneme ends in the i^th audio file
+                train_phonemes[i][3] = a list of transcriptions of all the phonemes in the i^th audio file
+                train_phonemes[i][4] = a list of numerical IDs of all the phonemes in the i^th audio file
+                train_phonemes[i][5] = a list of 1-hot-vector representation of the numerical IDs of all the phonemes in the i^th audio file
+                
+                test_phonemes has a similar structure
+    """
+    train_phonemes = audio_files_phonemes.getTrainElements()
+    
+    # Get the phonemes information for every audio file in the test set
+    test_phonemes = audio_files_phonemes.getTestElements()
+
+    return train_phonemes, test_phonemes
     
 def test1(dataset):
     for i in range(len(dataset)):
