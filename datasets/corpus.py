@@ -8,7 +8,7 @@ class Corpus:
     Largely adapted from: https://github.com/rash-me-not/TIMIT-phoneme-recognition-with-Recurrent-Neural-Nets 
     """
     
-    audioext = ".WAV.wav"
+    audioext = ".WAV"
     
     # List of phoneme symbols used in phone-level transcriptions 
     phones = ["b", "d", "g", "p", "t", "k", "dx", "q", 
@@ -37,7 +37,7 @@ class Corpus:
         self.feature_extractor = None
 
         # Find sample rate, traverse audio directory for first wav file we find
-        self.Fs = scipy.io.wavfile.read(transcription_dir + sample_file_dir + ".WAV.wav")[0]
+        self.Fs = scipy.io.wavfile.read(transcription_dir + sample_file_dir + ".WAV")[0]
 
         # Walk iterates over lists of subdirectories and files in
         # a directory tree. 

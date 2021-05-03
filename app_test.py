@@ -24,14 +24,14 @@ def main(argv):
     
     # Initialize a Corpus object
     example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  #SA1.wav.WAV
-    dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
-    # dataset_dir = '../timit'
+    #dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
+    dataset_dir = '../timit'
     corpus = Corpus(dataset_dir, example_file_dir) # TIMIT corpus
     phonemes = corpus.get_phonemes()  # List of phonemes
     targets = len(phonemes)  # Number of categories
 
     # Load the TIMIT dataset
-    dataset = TimitDataset(csv_file='test_data.csv',
+    dataset = TimitDataset(csv_file='train_data.csv',
                            root_dir = dataset_dir,
                            transform=MFCC(n_fft=FLAGS.n_fft,
                                           preemphasis_coefficient=FLAGS.preemphasis_coefficient,
