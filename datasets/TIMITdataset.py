@@ -26,6 +26,7 @@ class TimitDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
+        path = os.path.join(root_dir, csv_file)
         self.audio_frame = pd.read_csv(os.path.join(root_dir, csv_file))
         self.audio_frame = self.audio_frame[self.audio_frame['is_converted_audio'] == True]
 
@@ -166,7 +167,7 @@ class TimitDataset(Dataset):
 
 csv_filename = 'train_data.csv'
 root_dir = '../timit'
-
+'''
 train_set = TimitDataset(csv_file=csv_filename, root_dir=root_dir, pre_epmh=0.97, num_ceps=13, n_fft=512, frame_size=20, frame_shift=10)
 print('dataset size', len(train_set))
 max_len = 0
@@ -190,7 +191,4 @@ for i in range(len(test_set)):
         max_len = sample.shape[0]
         print("new max: ", max_len)
 print("max", max_len)
-print("dataset size", len(test_set))
-
-'''sample = dataset.__getitem__(0)
-print(sample)'''
+print("dataset size", len(test_set)) '''
