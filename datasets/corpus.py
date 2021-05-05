@@ -48,8 +48,7 @@ class Corpus:
                     # Found one, get sample rate and stop looking
         #            self.Fs, _ = \
         #                scipy.io.wavfile.read(os.path.join(directory, f))
-        #            break 
-        print(self.Fs)
+        #            break
 
     @classmethod
     def get_phonemes(cls):
@@ -82,7 +81,8 @@ class Corpus:
         
         # Construct location of phoneme transcription file
         # phnfile = os.path.join(self.transcriptions, utterance + ".phn")
-        phnfile = self.transcriptions + utterance + ".PHN"
+        # phnfile = self.transcriptions + utterance + ".PHN"
+        phnfile = utterance
         
         starts = []
         stops = []
