@@ -38,8 +38,6 @@ def train(dataset, num_epochs):
     for epoch in tqdm(range(num_epochs), desc='training epochs'):
 
         for batch in tqdm(train_loader, desc="training batches"):
-
-
             sample, target = batch
             sample.to(device)
             target.to(device)

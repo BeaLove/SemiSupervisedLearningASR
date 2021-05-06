@@ -9,8 +9,9 @@ class LSTM(nn.Module):
                 '''
 
         self.hidden_layers = nn.LSTM(mfccs, size_hidden_layers, num_layers=5)
-        self.output_layer = nn.Sequential(nn.Linear(size_hidden_layers, output_phonemes),
-                            nn.Softmax())
+        '''self.output_layer = nn.Sequential(nn.Linear(size_hidden_layers, output_phonemes),
+                            nn.Softmax())'''
+        self.output_layer = nn.Linear(size_hidden_layers, output_phonemes)
 
     def forward(self, x):
         x, (h_n, c_n) = self.hidden_layers(x)
