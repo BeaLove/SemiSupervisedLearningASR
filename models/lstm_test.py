@@ -70,9 +70,10 @@ class LSTMTagger(nn.Module):
         return tag_scores
 
 model = LSTMTagger(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
-loss_function = nn.NLLLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.1)
-
+# loss_function = nn.NLLLoss()
+loss_function = nn.CTCLoss()
+# optimizer = optim.SGD(model.parameters(), lr=0.1)
+optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 with torch.no_grad():
     inputs = prepare_sequence(training_data[0][0], word_to_ix)
     tag_scores = model(inputs)
