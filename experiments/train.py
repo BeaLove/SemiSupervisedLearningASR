@@ -38,19 +38,24 @@ def train(dataset, num_epochs):
     for epoch in tqdm(range(num_epochs), desc='training epochs'):
 
         for batch in tqdm(train_loader, desc="training batches"):
-            #TODO call forward, loss_func, optimizer etc in right order haha
-            #batch.to(device)
+
+
             sample, target = batch
+            sample.to(device)
+            target.to(device)
             optimizer.zero_grad()
             prediction = model.forward(sample)
-            print(prediction.shape)
-            print(target.shape)
+            #print(prediction.shape)
+            #print(target.shape)
 
-            loss_val = loss(prediction.squeeze(), target)
+            loss_val = loss(prediction.squeeze(), target.squeeze())
+            #print("loss", loss_val)
             loss_val.backward()
             optimizer.step()
+        print(loss_val)
 
-            batch.set_postfix(loss.item())
+
+            #batch.set_postfix(loss.item())
 
 
 

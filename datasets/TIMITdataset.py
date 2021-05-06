@@ -82,8 +82,6 @@ class TimitDataset(Dataset):
         path = os.path.splitext(path)[0]
         path = os.path.splitext(path)[0]
 
-
-
         audio_name = path + '.WAV.wav'
         #print("audio", audio_name)
 
@@ -125,11 +123,16 @@ class TimitDataset(Dataset):
 
 
         frame_labels = frame_labels[:sample.shape[0]]
+        if len(frame_labels) < sample.shape[0]:
+            pad = sample.shape[0] - len(frame_labels)
+            frame_labels += ['h#']*pad
 
         encoded_phones = []
         #for phone in frame_labels:
          #   encoded_phones.append(self.getPhoneCode(phone))
-        targets = torch.tensor([self.oneHot(self.num_labels, self.getPhoneCode(phone)) for phone in frame_labels] , dtype=torch.float64)
+        #targets = torch.tensor([self.oneHot(self.num_labels, self.getPhoneCode(phone)) for phone in frame_labels] , dtype=torch.float64)
+        '''try without one hot encoding'''
+        targets = torch.tensor([self.getPhoneCode(phone) for phone in frame_labels])
         #targets = torch.nn.utils.rnn.pad_packed_sequence(targets, total_length=777)
         #print(targets.shape)
         #sample = {'audio': sample, 'targets': targets}
