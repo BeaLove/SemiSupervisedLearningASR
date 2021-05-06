@@ -22,14 +22,29 @@ def main(args):
                            pre_epmh=FLAGS.preemphasis_coefficient,
                            num_ceps=FLAGS.num_ceps, n_fft=FLAGS.n_fft, frame_size=FLAGS.frame_len,
                            frame_shift=FLAGS.frame_shift)
+    '''important before training a model set model name so checkpoints 
+    and fully trained model gets saved with correct name'''
+    model_name = 'vanillaLSTMfullylabeled'
+    save_folder = os.path.abspath('trained_models')
+    save_path = os.path.join(save_folder, model_name)
+    model = train(dataset, num_epochs=10)
 
-    train(dataset, num_epochs=10)
+    torch.save(model.state_dict(), save_path)
 
 
-def train(dataset, num_epochs):
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    train_loader = torch.utils.data.DataLoader(dataset, batch_size=1, num_workers=3, shuffle=True)
+def train(dataset, num_epochs, batch_size=1):
+    #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    if torch.cuda.is_available():
+        print('using cuda')
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    train_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, num_workers=3, shuffle=True)
+    if batch_size > 1:
+        train_loader = torch.nn.utils.rnn.pad_packed_sequence(train_loader)
+
     loss = nn.CrossEntropyLoss()
     model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     model.to(device)
@@ -51,6 +66,8 @@ def train(dataset, num_epochs):
             loss_val.backward()
             optimizer.step()
         print(loss_val)
+
+    return model
 
 
             #batch.set_postfix(loss.item())
