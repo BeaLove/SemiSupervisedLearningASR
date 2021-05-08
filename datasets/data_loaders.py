@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torchaudio
-import data_transformations
+from . import data_transformations
 import ctypes
 import multiprocessing as mp
 
