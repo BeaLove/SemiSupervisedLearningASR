@@ -14,7 +14,7 @@ import torch.utils.data.dataloader
 import tqdm
 import datetime
 
-from SemiSupervisedLearningASR.datasets.TIMITdataset import TimitDataset
+from datasets.TIMITdataset import TimitDataset
 #from datasets.data_transformations import MFCC
 
 FLAGS = flags.FLAGS

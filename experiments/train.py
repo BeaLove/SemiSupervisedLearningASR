@@ -1,5 +1,5 @@
 import os.path
-from SemiSupervisedLearningASR import test
+import test
 import torch.utils.data
 import torch.nn as nn
 from absl import app
@@ -8,17 +8,17 @@ import numpy as np
 
 from tqdm import tqdm
 
-from SemiSupervisedLearningASR.models.lstm import LSTM
+from models.lstm import LSTM
 
 from absl import flags
-from SemiSupervisedLearningASR.datasets.TIMITdataset import TimitDataset
+from datasets.TIMITdataset import TimitDataset
 
 FLAGS = flags.FLAGS
 
 
 def main(args):
-    root_dir = os.path.abspath('timit')
-    print(root_dir)
+    root_dir = '../timit'
+
     dataset = TimitDataset(csv_file='train_data.csv', root_dir=root_dir,
                            pre_epmh=FLAGS.preemphasis_coefficient,
                            num_ceps=FLAGS.num_ceps, n_fft=FLAGS.n_fft, frame_size=FLAGS.frame_len,
@@ -50,15 +50,15 @@ def main(args):
     accuracy = correct / total * 100
     print(accuracy)
 
-
-
-def train(train_set, val_set, num_epochs, batch_size=1):
+def train(dataset, num_epochs, batch_size=1):
     train_losses = []
     val_losses = []
     avg_train_losses = []
     avg_val_losses = []
     patience = 20
-
+    val_split = int(len(dataset)*0.15)
+    train_data, val_data = torch.utils.data.random_split(dataset, [len(dataset) - val_split, val_split],
+                                                         generator=torch.Generator().manual_seed(15))
     if torch.cuda.is_available():
         print('using cuda')
         device = torch.device('cuda:0')
@@ -66,17 +66,17 @@ def train(train_set, val_set, num_epochs, batch_size=1):
         print('using cpu')
         device = torch.device('cpu')
 
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, num_workers=3, shuffle=True)
-    if batch_size > 1:
-        train_loader = torch.nn.utils.rnn.pad_packed_sequence(train_loader)
-    val_loader = torch.utils.data.DataLoader(val_set, batch_size=12, num_workers=2)
-    val_loader = torch.nn.utils.rnn.pad_packed_sequence(val_loader)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, num_workers=3, shuffle=True)
+    '''if batch_size > 1:
+        train_loader = torch.nn.utils.rnn.pad_packed_sequence(train_loader)'''
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=1, num_workers=2)
+    #val_loader = torch.nn.utils.rnn.pad_packed_sequence(val_loader)
 
     loss = nn.CrossEntropyLoss()
     model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters())
-    early_stop = EarlyStopping(patience=patience, verbose=True)
+    #early_stop = EarlyStopping(patience=patience, verbose=True)
     for epoch in tqdm(range(num_epochs), desc='training epochs'):
 
         for batch in tqdm(train_loader, desc="training batches"):
@@ -100,19 +100,31 @@ def train(train_set, val_set, num_epochs, batch_size=1):
             avg_val_loss = np.average(val_losses)
             avg_val_losses.append(avg_val_loss)
 
-            early_stop(avg_val_loss, model)
+        if epoch % 10 == 0:
+            checkpoint_dict = {
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'val_loss': avg_val_losses[-1],
+                'train_loss': avg_train_losses[-1]
+            }
+            name = 'checkpoint epoch {}.pt'.format(epoch)
+            path = '../checkpoints/' + name
+            torch.save(checkpoint_dict, path)
+
+            '''early_stop(avg_val_loss, model)
             if early_stop.early_stop:
                 print("Early stopping")
                 model.load_state_dict(torch.load('checkpoint.pt'))
-                break
+                break'''
 
     return model, avg_val_losses, avg_train_losses
 
 def validate(val_set, model):
     correct = 0
     total = 0
-    val_loader = torch.utils.data.DataLoader(val_set, batch_size=12, num_workers=2)
-    val_loader = torch.nn.utils.rnn.pad_packed_sequence(val_loader)
+    val_loader = torch.utils.data.DataLoader(val_set, batch_size=1, num_workers=2)
+    #val_loader = torch.nn.utils.rnn.pad_packed_sequence(val_loader)
 
     model.eval()
     for point in tqdm(val_loader):
