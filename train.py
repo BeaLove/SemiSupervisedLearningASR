@@ -33,7 +33,7 @@ def main(args):
     os.makedirs(save_folder, exist_ok=True)
     torch.save(model.state_dict(), save_path)
 
-    timestamp = str(datetime.date()) + str(datetime.time())
+    timestamp = str(datetime.now())
     with open('avg_val_losses.txt', 'a') as valLossFile:
         valLossFile.write(timestamp)
         valLossFile.writelines(avg_val_losses)
