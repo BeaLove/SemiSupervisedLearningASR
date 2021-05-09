@@ -12,10 +12,16 @@ def test_model(model, test_data):
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, num_workers=3)
     correct = 0
     total = 0
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
     for point in test_loader:
         sample, target = point
+        sample = sample.to(device)
+        target = target.to(device)
         output = model.forward(sample)
-        prediction = torch.max(output, dim=1).indices
+        prediction = torch.max(output, dim=0).indices
         correct += (prediction == target).float().sum()
         total += target.shape[0]
     accuracy = correct/total * 100
