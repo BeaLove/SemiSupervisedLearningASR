@@ -50,8 +50,8 @@ tag_to_ix = {"DET": 0, "NN": 1, "V": 2}  # Assign each tag with a unique index
 # opt = Options()
 #
 # opt.cuda = False
-EMBEDDING_DIM = 6
-HIDDEN_DIM = 6          # TODO change this to 100 or 50
+EMBEDDING_DIM = 100
+HIDDEN_DIM = 100         # TODO change this to 100 or 50
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -79,27 +79,31 @@ class LSTMTagger(nn.Module):
 model = LSTMTagger(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)).to(device)
 loss_function = nn.NLLLoss()
 # loss_function = nn.CTCLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.1)
-# optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+# optimizer = optim.SGD(model.parameters(), lr=0.1)
+optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 with torch.no_grad():
     inputs = prepare_sequence(training_data[0][0], word_to_ix)
     tag_scores = model(inputs)
-    print(tag_scores)
+    # print(tag_scores)
 
+loss_array = []
 for epoch in range(300):  # again, normally you would NOT do 300 epochs, it is toy data
     for sentence, tags in training_data:
         model.zero_grad()
         sentence_in = prepare_sequence(sentence, word_to_ix)
         targets = prepare_sequence(tags, tag_to_ix)
         targets = targets.to(device)                            ###### todo check if correct
+
         tag_scores = model(sentence_in)
 
         loss = loss_function(tag_scores, targets)
         loss.backward()
         optimizer.step()
 
-        print('loss')
-        print(loss)
+        # print('loss')
+        # print(loss)
+        loss_array.append(loss)
+
 
     # See what the scores are after training
     with torch.no_grad():
@@ -108,3 +112,5 @@ for epoch in range(300):  # again, normally you would NOT do 300 epochs, it is t
 
         # print(tag_scores)
 
+print('FINAL LOSS')
+print(loss_array)
