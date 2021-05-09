@@ -64,7 +64,7 @@ def main(args):
             target = target.to(device)
             output = model.forward(sample)
             prediction = torch.max(output, dim=0)
-            correct += (prediction == target).float().sum()
+            correct += (prediction == target).long().sum()
             total += target.shape[0]
     accuracy = correct / total * 100
 
