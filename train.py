@@ -37,7 +37,7 @@ def main(args):
         print('using cpu')
         device = torch.device('cpu')
 
-    model, avg_val_losses, avg_train_losses = train(dataset, num_epochs= 1)
+    model, avg_val_losses, avg_train_losses = train(dataset, num_epochs= 200)
     os.makedirs(save_folder, exist_ok=True)
     torch.save(model.state_dict(), save_path)
 
