@@ -36,10 +36,10 @@ def main(args):
     timestamp = str(datetime.now())
     with open('avg_val_losses.txt', 'a') as valLossFile:
         valLossFile.write(timestamp)
-        valLossFile.writelines(avg_val_losses)
+        valLossFile.writelines(str(avg_val_losses))
     with open('avg_train_losses.txt', 'a') as trainLossFile:
         trainLossFile.write(timestamp)
-        trainLossFile.writelines(avg_train_losses)
+        trainLossFile.writelines(str(avg_train_losses))
 
     test_data = TimitDataset(csv_file='test_data.csv', root_dir=root_dir,
                            pre_epmh=FLAGS.preemphasis_coefficient,
@@ -59,7 +59,7 @@ def main(args):
     accuracy = correct / total * 100
 
     with open('test_accuracy.txt', 'a') as test_accuracy:
-        test_accuracy.write(timestamp, accuracy)
+        test_accuracy.write(timestamp, str(accuracy))
     print(accuracy)
 
 def train(dataset, num_epochs, batch_size=1):
@@ -91,7 +91,7 @@ def train(dataset, num_epochs, batch_size=1):
     #early_stop = EarlyStopping(patience=patience, verbose=True)
     for epoch in tqdm(range(num_epochs), desc='training epochs'):
 
-        for batch in tqdm(train_loader, desc="training batches"):
+        for batch in train_loader:
             sample, target = batch
             sample = sample.to(device)
             target = target.to(device)
