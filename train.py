@@ -5,6 +5,8 @@ import torch.nn as nn
 from absl import app
 import numpy as np
 from datetime import datetime
+from test import test
+
 
 
 from tqdm import tqdm
@@ -54,23 +56,10 @@ def main(args):
                            num_ceps=FLAGS.num_ceps, n_fft=FLAGS.n_fft, frame_size=FLAGS.frame_len,
                            frame_shift=FLAGS.frame_shift)
 
-''' correct = 0
-    total = 0
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, num_workers=3)
-    with torch.no_grad():
-        for point in tqdm(test_loader):
-            sample, target = point
-            sample = sample.to(device)
-            target = target.to(device)
-            output = model.forward(sample)
-            prediction = torch.max(output, dim=0)
-            correct += (prediction == target).long().sum()
-            total += target.shape[0]
-    accuracy = correct / total * 100
+    accuracy = test(model, test_data)
 
-    with open('test_accuracy.txt', 'a') as test_accuracy:
-        test_accuracy.write(timestamp, str(accuracy))
-    print(accuracy)'''
+    print(accuracy)
+
 
 def train(dataset, num_epochs, batch_size=1):
     train_losses = []
@@ -78,6 +67,8 @@ def train(dataset, num_epochs, batch_size=1):
     avg_train_losses = []
     avg_val_losses = []
     patience = 20
+
+    os.makedirs('checkpoints', exist_ok=True)
     val_split = int(len(dataset)*0.15)
     train_data, val_data = torch.utils.data.random_split(dataset, [len(dataset) - val_split, val_split],
                                                          generator=torch.Generator().manual_seed(15))
@@ -113,7 +104,7 @@ def train(dataset, num_epochs, batch_size=1):
             optimizer.step()
         avg_train_losses.append(np.average(train_losses))
 
-        if epoch > 10:
+        if epoch > 9:
             model.eval()
             for data, target in tqdm(val_loader):
                 data = data.to(device)
@@ -132,8 +123,9 @@ def train(dataset, num_epochs, batch_size=1):
                 'val_loss': avg_val_losses[-1],
                 'train_loss': avg_train_losses[-1]
             }
-            name = 'checkpoint epoch {}.pt'.format(epoch)
-            path = '../checkpoints/' + name
+            timestamp = datetime.now()
+            name = 'checkpoint' + str(timestamp) + 'epoch {}.pt'.format(epoch)
+            path = 'checkpoints/' + name
             torch.save(checkpoint_dict, path)
 
             '''early_stop(avg_val_loss, model)
