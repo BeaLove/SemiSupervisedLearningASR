@@ -103,6 +103,7 @@ def train(dataset, num_epochs, batch_size=1):
             loss_val.backward()
             optimizer.step()
         avg_train_losses.append(np.average(train_losses))
+        print(avg_train_losses[-1])
 
         if epoch > 9:
             model.eval()
