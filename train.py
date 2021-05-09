@@ -111,7 +111,7 @@ def train(dataset, num_epochs, batch_size=1):
             avg_val_loss = np.average(val_losses)
             avg_val_losses.append(avg_val_loss)
 
-        if epoch % 10 == 0:
+        if epoch > 0 and epoch % 10 == 0:
             checkpoint_dict = {
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
