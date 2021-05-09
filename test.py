@@ -7,7 +7,7 @@ import tqdm
 from datetime import datetime
 
 
-def test(model, test_data):
+def test_model(model, test_data):
     model.eval()
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, num_workers=3)
     correct = 0
