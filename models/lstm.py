@@ -14,6 +14,6 @@ class LSTM(nn.Module):
         self.output_layer = nn.Linear(size_hidden_layers, output_phonemes)
 
     def forward(self, x):
-        x, (h_n, c_n) = self.hidden_layers(x)
+        x, _ = self.hidden_layers(x)
         return self.output_layer(x)
 
