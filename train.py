@@ -29,6 +29,14 @@ def main(args):
     model_name = 'vanillaLSTMfullylabeled.pth'
     save_folder = os.path.abspath('trained_models')
     save_path = os.path.join(save_folder, model_name)
+
+    if torch.cuda.is_available():
+        print('using cuda')
+        device = torch.device('cuda:0')
+    else:
+        print('using cpu')
+        device = torch.device('cpu')
+
     model, avg_val_losses, avg_train_losses = train(dataset, num_epochs= 1)
     os.makedirs(save_folder, exist_ok=True)
     torch.save(model.state_dict(), save_path)
@@ -52,6 +60,8 @@ def main(args):
     with torch.no_grad():
         for point in tqdm(test_loader):
             sample, target = point
+            sample = sample.to(device)
+            target = target.to(device)
             output = model.forward(sample)
             prediction = torch.max(output, dim=0)
             correct += (prediction == target).float().sum()
@@ -106,6 +116,8 @@ def train(dataset, num_epochs, batch_size=1):
         if epoch > 10:
             model.eval()
             for data, target in tqdm(val_loader):
+                data = data.to(device)
+                target = target.to(device)
                 output = model.forward(data)
                 val_loss = loss(output.squeeze(), target.squeeze())
                 val_losses.append(val_loss.item())
