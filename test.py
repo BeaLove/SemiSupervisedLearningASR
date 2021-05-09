@@ -21,7 +21,7 @@ def test_model(model, test_data):
         sample = sample.to(device)
         target = target.to(device)
         output = model.forward(sample)
-        prediction = torch.max(output, dim=1).indices
+        prediction = torch.max(output, dim=0).indices
         print(prediction.shape)
         correct += (prediction == target).float().sum()
         total += target.shape[0]
