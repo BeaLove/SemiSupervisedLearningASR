@@ -22,7 +22,7 @@ def test_model(model, test_data):
         target = target.to(device)
         output = model.forward(sample)
         print(output.shape)
-        prediction = torch.max(output, dim=0).indices
+        prediction = torch.max(output.squeeze(), dim=0).indices
         print(prediction)
         correct += (prediction == target).float().sum()
         total += target.shape[0]
