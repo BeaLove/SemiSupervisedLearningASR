@@ -30,6 +30,7 @@ def main(args):
     save_folder = os.path.abspath('trained_models')
     save_path = os.path.join(save_folder, model_name)
     model, avg_val_losses, avg_train_losses = train(dataset, num_epochs= 1)
+    os.makedirs(save_folder, exist_ok=True)
     torch.save(model.state_dict(), save_path)
 
     timestamp = datetime.timestamp()
