@@ -5,7 +5,7 @@ import torch.nn as nn
 from absl import app
 import numpy as np
 from datetime import datetime
-from test import test
+from test import test_model
 
 
 
@@ -56,7 +56,7 @@ def main(args):
                            num_ceps=FLAGS.num_ceps, n_fft=FLAGS.n_fft, frame_size=FLAGS.frame_len,
                            frame_shift=FLAGS.frame_shift)
 
-    accuracy = test.test(model, test_data)
+    accuracy = test_model(model, test_data)
 
     print(accuracy)
 
