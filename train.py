@@ -54,7 +54,7 @@ def main(args):
                            num_ceps=FLAGS.num_ceps, n_fft=FLAGS.n_fft, frame_size=FLAGS.frame_len,
                            frame_shift=FLAGS.frame_shift)
 
-    correct = 0
+''' correct = 0
     total = 0
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, num_workers=3)
     with torch.no_grad():
@@ -70,7 +70,7 @@ def main(args):
 
     with open('test_accuracy.txt', 'a') as test_accuracy:
         test_accuracy.write(timestamp, str(accuracy))
-    print(accuracy)
+    print(accuracy)'''
 
 def train(dataset, num_epochs, batch_size=1):
     train_losses = []
