@@ -56,7 +56,7 @@ def main(args):
                            num_ceps=FLAGS.num_ceps, n_fft=FLAGS.n_fft, frame_size=FLAGS.frame_len,
                            frame_shift=FLAGS.frame_shift)
 
-    accuracy = test(model, test_data)
+    accuracy = test.test(model, test_data)
 
     print(accuracy)
 
