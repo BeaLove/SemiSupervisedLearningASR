@@ -12,7 +12,7 @@ def test_model(model, test_data):
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, num_workers=3)
     correct = 0
     total = 0
-    for point in tqdm(test_loader):
+    for point in test_loader:
         sample, target = point
         output = model.forward(sample)
         prediction = torch.max(output, dim=1).indices
