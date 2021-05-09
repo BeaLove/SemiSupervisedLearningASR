@@ -17,7 +17,7 @@ FLAGS = flags.FLAGS
 
 
 def main(args):
-    root_dir = '../timit'
+    root_dir = 'timit'
 
     dataset = TimitDataset(csv_file='train_data.csv', root_dir=root_dir,
                            pre_epmh=FLAGS.preemphasis_coefficient,
