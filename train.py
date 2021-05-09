@@ -92,8 +92,8 @@ def train(dataset, num_epochs, batch_size=1):
 
         for batch in tqdm(train_loader, desc="training batches"):
             sample, target = batch
-            sample.to(device)
-            target.to(device)
+            sample = sample.to(device)
+            target = target.to(device)
             optimizer.zero_grad()
             prediction = model.forward(sample)
             loss_val = loss(prediction.squeeze(), target.squeeze())
