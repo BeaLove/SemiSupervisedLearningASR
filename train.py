@@ -4,6 +4,7 @@ import torch.utils.data
 import torch.nn as nn
 from absl import app
 import numpy as np
+from datetime import datetime
 
 
 from tqdm import tqdm
@@ -28,9 +29,16 @@ def main(args):
     model_name = 'vanillaLSTMfullylabeled.pth'
     save_folder = os.path.abspath('trained_models')
     save_path = os.path.join(save_folder, model_name)
-    model, avg_val_losses, avg_train_losses = train(dataset, num_epochs= 20)
-
+    model, avg_val_losses, avg_train_losses = train(dataset, num_epochs= 1)
     torch.save(model.state_dict(), save_path)
+
+    timestamp = datetime.timestamp()
+    with open('avg_val_losses.txt', 'a') as valLossFile:
+        valLossFile.write(timestamp)
+        valLossFile.writelines(avg_val_losses)
+    with open('avg_train_losses.txt', 'a') as trainLossFile:
+        trainLossFile.write(timestamp)
+        trainLossFile.writelines(avg_train_losses)
 
     test_data = TimitDataset(csv_file='test_data.csv', root_dir=root_dir,
                            pre_epmh=FLAGS.preemphasis_coefficient,
@@ -48,6 +56,9 @@ def main(args):
             correct += (prediction == target).float().sum()
             total += target.shape[0]
     accuracy = correct / total * 100
+    timestamp = datetime.timestamp()
+    with open('test_accuracy.txt', 'a') as test_accuracy:
+        test_accuracy.write(timestamp, accuracy)
     print(accuracy)
 
 def train(dataset, num_epochs, batch_size=1):
