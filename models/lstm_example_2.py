@@ -43,15 +43,10 @@ for sent, tags in training_data:
 print(word_to_ix)
 tag_to_ix = {"DET": 0, "NN": 1, "V": 2}  # Assign each tag with a unique index
 
-# These will usually be more like 32 or 64 dimensional.
-# We will keep them small, so we can see how the weights change as we train.
-# class Options():
-#     pass
-# opt = Options()
-#
-# opt.cuda = False
+
 EMBEDDING_DIM = 100
 HIDDEN_DIM = 100         # TODO change this to 100 or 50
+isCTCLoss = False
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -77,9 +72,10 @@ class LSTMTagger(nn.Module):
         return tag_scores
 
 model = LSTMTagger(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)).to(device)
-loss_function = nn.NLLLoss()
-# loss_function = nn.CTCLoss()
-# optimizer = optim.SGD(model.parameters(), lr=0.1)
+if isCTCLoss:
+    loss_function = nn.CTCLoss()
+else:
+    loss_function = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 with torch.no_grad():
     inputs = prepare_sequence(training_data[0][0], word_to_ix)
@@ -87,21 +83,24 @@ with torch.no_grad():
     # print(tag_scores)
 
 loss_array = []
-for epoch in range(300):  # again, normally you would NOT do 300 epochs, it is toy data
+for epoch in range(300):  
     for sentence, tags in training_data:
         model.zero_grad()
         sentence_in = prepare_sequence(sentence, word_to_ix)
         targets = prepare_sequence(tags, tag_to_ix)
-        targets = targets.to(device)                            ###### todo check if correct
+        targets = targets.to(device)                            
 
         tag_scores = model(sentence_in)
 
-        loss = loss_function(tag_scores, targets)
+        if isCTCLoss:
+          # loss = loss_function(probs_here, targets, input_lengths, target_lengths)
+          print('uncomment here')
+        else:
+          loss = loss_function(trained_data, targets)  
+          
         loss.backward()
         optimizer.step()
 
-        # print('loss')
-        # print(loss)
         loss_array.append(loss)
 
 
@@ -112,5 +111,8 @@ for epoch in range(300):  # again, normally you would NOT do 300 epochs, it is t
 
         # print(tag_scores)
 
-print('FINAL LOSS')
-print(loss_array)
+# print('FINAL LOSS')
+# print(loss_array)
+plt.plot(loss_array)
+plt.show()
+
