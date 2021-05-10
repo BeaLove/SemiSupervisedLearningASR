@@ -16,4 +16,3 @@ class LSTM(nn.Module):
     def forward(self, x):
         x, _ = self.hidden_layers(x)
         return self.output_layer(x)
-
