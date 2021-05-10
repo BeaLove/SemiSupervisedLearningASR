@@ -46,9 +46,21 @@ rm timit.zip
 
 ## Running
 
-### Test
+### Test plotting MFCC coefficients
 
 This can be used to plot the result after running MFCC for the TIMIT dataset.
 ```bash
 python3 app_test.py --n_fft=512
+```
+
+### Train
+
+This can be used to train a model by using a experiment config. For example:
+```bash
+python3 train.py --flagfile=experiments/<experiment config>
+```
+
+If you want you can specify the flags by using command line args. For example:
+```bash
+python3 train.py --results_save_dir=results --dataset_root_dir='timit' --num_epochs=100
 ```
