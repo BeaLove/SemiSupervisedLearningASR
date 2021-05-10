@@ -7,7 +7,7 @@ import numpy as np
 from datetime import datetime
 from test import test_model
 from pathlib import Path
-
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from models.lstm import LSTM
@@ -53,11 +53,17 @@ def main(args):
     timestamp = str(datetime.now())
     with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'avg_val_losses.txt')), 'a') as valLossFile:
         valLossFile.write(timestamp)
+        valLossFile.write('\n')
         valLossFile.writelines(str(avg_val_losses))
 
     with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'avg_train_losses.txt')), 'a') as trainLossFile:
         trainLossFile.write(timestamp)
+        trainLossFile.write('\n')
         trainLossFile.writelines(str(avg_train_losses))
+
+    plt.plot(avg_train_losses)
+    plt.plot(avg_val_losses)
+    plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'loss_plot.png')))
 
     test_data = TimitDataset(csv_file='test_data.csv', root_dir=FLAGS.dataset_root_dir,
                              pre_epmh=FLAGS.preemphasis_coefficient,
@@ -97,7 +103,7 @@ def train(dataset, num_epochs, batch_size=1):
     loss = nn.CrossEntropyLoss()
     model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     #early_stop = EarlyStopping(patience=patience, verbose=True)
 
     bar = tqdm(range(num_epochs))
@@ -194,5 +200,8 @@ if __name__ == '__main__':
                         'The path to the dataset root directory')
     flags.DEFINE_string('results_save_dir', 'results',
                         'The path to the directory where all the results are saved')
+    flags.DEFINE_integer('hidden', 100, 'number of nodes in each LSTM layer')
+    flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
+
 
     app.run(main)
