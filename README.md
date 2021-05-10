@@ -55,7 +55,7 @@ python3 app_test.py --n_fft=512
 
 ### Train
 
-This can be used to train a model by using a experiment config. For example:
+This can be used to train a model by using an experiment config. For example:
 ```bash
 python3 train.py --flagfile=experiments/<experiment config>
 ```
