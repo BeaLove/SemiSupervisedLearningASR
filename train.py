@@ -33,7 +33,7 @@ def main(args):
     makedirs(FLAGS.results_save_dir)
     makedirs(os.path.join(FLAGS.results_save_dir, 'checkpoints'))
 
-    model_name = 'vanillaLSTMfullylabeled.pt'
+    model_name = FLAGS.name
 
     save_folder = os.path.abspath(FLAGS.results_save_dir)
     save_path = os.path.join(save_folder, model_name)
