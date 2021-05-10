@@ -63,7 +63,7 @@ class LSTMTagger(nn.Module):
         self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
 
     def forward(self, sentence):
-        sentence = sentence.to(device) # TODO  check if correct !!!!!!
+        sentence = sentence.to(device)  
 
         embeds = self.word_embeddings(sentence)
         lstm_out, _ = self.lstm(embeds.view(len(sentence), 1, -1))
