@@ -116,7 +116,7 @@ def train(dataset, num_epochs, batch_size=1):
             target = target.to(device)
             optimizer.zero_grad()
             prediction = model.forward(sample)
-            loss_val = loss(prediction.squeeze(), target.squeeze())
+            loss_val = loss(torch.squeeze(prediction, dim=1), target)
             train_losses.append(loss_val.item())
             loss_val.backward()
             optimizer.step()
