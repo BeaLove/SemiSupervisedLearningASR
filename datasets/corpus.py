@@ -8,7 +8,7 @@ class Corpus:
     Largely adapted from: https://github.com/rash-me-not/TIMIT-phoneme-recognition-with-Recurrent-Neural-Nets 
     """
     
-    audioext = ".WAV"
+    audioext = ".WAV.wav"
     
     # List of phoneme symbols used in phone-level transcriptions 
     phones = ["b", "d", "g", "p", "t", "k", "dx", "q", 
@@ -26,7 +26,8 @@ class Corpus:
     silence = "h#"
 
     # Create dictionary to map phonemes to numbers, e.g. phone2int['g'] = 2
-    phone2int = dict([(key,val) for val,key in enumerate(phones)])
+    phone2int = {'iy': 0, 'ih': 1, 'eh': 2, 'ae': 3, 'ix': 4, 'ax': 5, 'ah': 6, 'uw': 7, 'ux': 7, 'uh': 8, 'ao': 9, 'aa': 10, 'ey': 11, 'ay': 12, 'oy': 13, 'aw': 14, 'ow': 15, 'l': 16, 'el': 17, 'r': 18, 'y': 19, 'w': 20, 'er': 21, 'axr': 21,  'm': 22, 'em': 22, 'n': 23, 'nx': 23, 'en': 24, 'ng': 25, 'eng': 25,  'ch': 26, 'jh': 27, 'dh': 28, 'b': 29, 'd': 30, 'dx': 31, 'g': 32,  'p': 33, 't': 34, 'k': 35, 'z': 36, 'zh': 37, 'v': 38, 'f': 39, 'th': 40, 's': 41, 'sh': 42, 'hh': 43, 'hv': 43, 'pcl': 44, 'tcl': 44, 'kcl': 44, 'qcl': 44, 'bcl': 45, 'dcl': 45, 'gcl': 45, 'epi': 46, 'sil': 47, 'h#': 47, '#h': 47, 'pau': 47, 'q': 48, 'ax-h': 49}
+                 #dict([(key,val) for val,key in enumerate(phones)]) # for the full version
 
     def __init__(self, transcription_dir, sample_file_dir):
         """Corpus(transcription_dir, audio_dir)
@@ -37,7 +38,7 @@ class Corpus:
         self.feature_extractor = None
 
         # Find sample rate, traverse audio directory for first wav file we find
-        self.Fs = scipy.io.wavfile.read(transcription_dir + sample_file_dir + ".WAV")[0]
+        self.Fs = scipy.io.wavfile.read(transcription_dir + sample_file_dir + ".WAV.wav")[0]
 
         # Walk iterates over lists of subdirectories and files in
         # a directory tree. 
@@ -57,6 +58,12 @@ class Corpus:
         See TIMIT doc/phoncode.doc for details on meanings
         """
         return cls.phones
+    
+    def get_phones_len(cls, whole = False):
+        if(whole == True):
+            return len(cls.phones)
+        else:
+            return 50
 
     @classmethod
     def get_phones_ID(cls, phoneme):
@@ -105,6 +112,10 @@ class Corpus:
             stops = stops / Fs            
             
         return starts, stops, phones
+
+    def get_silence(self):
+        "get_silence() - Return label for silence/noise"
+        return self.silence 
     
     def get_audiofilename(self, audio_dir, utterance):
         """get_audiofilename(utterance)
@@ -224,12 +235,15 @@ class Corpus:
     def categorical(y, num_classes):
         """ 1-hot encodes a tensor """
         return np.eye(num_classes, dtype='uint8')[y]
-    
+
     @classmethod
-    def phones_to_onehot(cls, phones):
+    def phones_to_onehot(cls, phones, whole = False):
         """"phones_to_onehot(phones)
         Given a list of phones, convert them to one hot vectors
         """
-        N = len(cls.phones)
+        if(whole == True):
+            N = len(cls.phones)
+        else:
+            N = 50
         phonenum = [cls.phone2int[p] for p in phones]
         return cls.categorical(phonenum, N)
