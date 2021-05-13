@@ -188,6 +188,9 @@ def validate(val_loader, model):
     model.eval()
     for point in tqdm(val_loader):
         sample, target = point
+        sample = sample.to(device)
+        target = target.to(device)
+
         output = model.forward(sample)
         
         _, prediction = torch.max(prediction_2, dim=1)
