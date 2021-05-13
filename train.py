@@ -88,7 +88,11 @@ def train(dataset, num_epochs, batch_size=1):
     avg_train_losses = []
     avg_val_losses = []
     accuracies = []
-    patience = 20
+    patience = 3
+    min_epochs = 5
+    epochs_no_improve = 0
+    early_stop = False
+    min_val_loss = np.inf
 
     val_split = int(len(dataset)*0.15)
     train_data, val_data = torch.utils.data.random_split(dataset, [len(dataset) - val_split, val_split],
@@ -144,6 +148,18 @@ def train(dataset, num_epochs, batch_size=1):
         for data, target in val_loader:
             loss_value = loss_fn(model, loss, device, data, target)
             val_losses.append(loss_value.item())
+            if loss_value < min_val_loss:
+                epochs_no_improve = 0
+                min_val_loss = loss_value
+                torch.save(model.state_dict(), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
+            else:
+                epochs_no_improve += 1
+            if epoch > min_epochs and epochs_no_improve == patience:
+                print("Early stopping!")
+                early_stop = True
+                break
+            else:
+                continue
 
         avg_val_loss = np.average(val_losses)
         avg_val_losses.append(avg_val_loss)
@@ -178,7 +194,9 @@ def train(dataset, num_epochs, batch_size=1):
                 print("Early stopping")
                 model.load_state_dict(torch.load('checkpoint.pt'))
                 break'''
-
+        if early_stop:
+            print("Early stopped after {} epochs".format(epoch))
+            break
     return model, avg_val_losses, avg_train_losses
 
 
@@ -215,7 +233,7 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 100, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
     flags.DEFINE_string('dataset_root_dir', 'timit',
                         'The path to the dataset root directory')
