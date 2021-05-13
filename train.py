@@ -10,7 +10,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from models.lstm import LSTM
+from models.lstm import LSTMModel
+from models.lstm1 import LSTM
 
 from absl import flags
 from datasets.TIMITdataset import TimitDataset
@@ -50,20 +51,15 @@ def main(args):
 
     torch.save(model.state_dict(), save_path)
 
-    timestamp = str(datetime.now())
-    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'avg_val_losses.txt')), 'a') as valLossFile:
-        valLossFile.write(timestamp)
-        valLossFile.write('\n')
-        valLossFile.writelines(str(avg_val_losses))
-
-    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'avg_train_losses.txt')), 'a') as trainLossFile:
-        trainLossFile.write(timestamp)
-        trainLossFile.write('\n')
-        trainLossFile.writelines(str(avg_train_losses))
+    np.savetxt(os.path.abspath(os.path.join(FLAGS.results_save_dir,
+               'avg_val_losses.txt')), np.asarray(avg_val_losses), delimiter=',')
+    np.savetxt(os.path.abspath(os.path.join(FLAGS.results_save_dir,
+               'avg_train_losses.txt')), np.asarray(avg_train_losses), delimiter=',')
 
     plt.plot(avg_train_losses)
     plt.plot(avg_val_losses)
-    plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'loss_plot.png')))
+    plt.savefig(os.path.abspath(os.path.join(
+        FLAGS.results_save_dir, 'loss_plot.png')))
 
     test_data = TimitDataset(csv_file='test_data.csv', root_dir=FLAGS.dataset_root_dir,
                              pre_epmh=FLAGS.preemphasis_coefficient,
@@ -73,6 +69,17 @@ def main(args):
     accuracy = test.test_model(model, test_data)
 
     print(accuracy)
+
+
+def loss_fn(model, loss, device, data, target):
+    data = data.to(device)
+    target = target.to(device)
+    prediction = model.forward(data)
+
+    prediction_2 = torch.squeeze(prediction, dim=0)
+    target_2 = torch.squeeze(target, dim=0)
+
+    return loss(prediction_2, target_2)
 
 
 def train(dataset, num_epochs, batch_size=1):
@@ -100,10 +107,20 @@ def train(dataset, num_epochs, batch_size=1):
         val_data, batch_size=1, num_workers=2)
     #val_loader = torch.nn.utils.rnn.pad_packed_sequence(val_loader)
 
-    loss = nn.CrossEntropyLoss()
+    # Add CTC Loss
+    if (FLAGS.loss == 'CrossEntropyLoss'):
+        loss = nn.CrossEntropyLoss()
+    else:
+        loss = nn.CrossEntropyLoss()
+
+    # model = LSTMModel(input_dim=13, hidden_dim=500,
+    #                  layer_dim=1, output_dim=dataset.num_labels)
+
     model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
+        0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     #early_stop = EarlyStopping(patience=patience, verbose=True)
 
     bar = tqdm(range(num_epochs))
@@ -111,31 +128,28 @@ def train(dataset, num_epochs, batch_size=1):
     for epoch in bar:
 
         for batch in train_loader:
-            sample, target = batch
-            sample = sample.to(device)
-            target = target.to(device)
+            data, target = batch
+
             optimizer.zero_grad()
-            prediction = model.forward(sample)
-            loss_val = loss(torch.squeeze(prediction, dim=1), target)
-            train_losses.append(loss_val.item())
-            loss_val.backward()
+            loss_value = loss_fn(model, loss, device, data, target)
+            loss_value.backward()
             optimizer.step()
+
+            train_losses.append(loss_value.item())
 
         avg_train_losses.append(np.average(train_losses))
 
         model.eval()
         for data, target in val_loader:
-            data = data.to(device)
-            target = target.to(device)
-            output = model.forward(data)
-            val_loss = loss(output.squeeze(), target.squeeze())
-            val_losses.append(val_loss.item())
+            loss_value = loss_fn(model, loss, device, data, target)
+            val_losses.append(loss_value.item())
+
         avg_val_loss = np.average(val_losses)
         avg_val_losses.append(avg_val_loss)
         model.train()
 
         bar.set_description(
-            'train_loss {:.3f}; loss_loss {:.3f}'.format(
+            'train_loss {:.3f}; val_loss {:.3f}'.format(
                 avg_train_losses[-1], avg_val_losses[-1])
         )
 
@@ -174,8 +188,8 @@ def validate(val_set, model):
         sample, target = point
         sample = torch.nn.utils.rnn.pad_packed_sequence(sample)
         output = model.forward(sample)
-        prediction = torch.max(output, dim=0)
-        correct += (prediction == target).float().sum()
+        _, prediction = torch.max(output, 1)
+        correct += (prediction == target).sum()
         total += target.shape[0]
     accuracy = correct / total * 100
 
@@ -202,6 +216,7 @@ if __name__ == '__main__':
                         'The path to the directory where all the results are saved')
     flags.DEFINE_integer('hidden', 100, 'number of nodes in each LSTM layer')
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
-
+    flags.DEFINE_string('loss', 'CrossEntropyLoss',
+                        'The name of loss function')
 
     app.run(main)

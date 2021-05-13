@@ -36,7 +36,7 @@ class LSTMModel(nn.Module):
         super(LSTMModel, self).__init__()
         self.hidden_dim = hidden_dim
         self.layer_dim = layer_dim
-        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
+        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first= False)
         self.fc = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
@@ -46,7 +46,8 @@ class LSTMModel(nn.Module):
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
         out = self.fc(out[:, -1, :])
         return out
-    
+
+  
 ##### HOW TO RUN LSTM MODEL
 # model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim).to(device)
 
