@@ -193,7 +193,7 @@ def validate(val_loader, model, device):
 
         output = model.forward(sample)
         
-        _, prediction = torch.max(prediction_2, dim=1)
+        _, prediction = torch.max(output, dim=1)
  
         correct += (prediction == target).sum()
         total += target.shape[1]
