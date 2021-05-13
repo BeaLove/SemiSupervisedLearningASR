@@ -78,7 +78,7 @@ def loss_fn(model, loss, device, data, target):
 
     prediction_2 = torch.squeeze(prediction, dim=0)
     target_2 = torch.squeeze(target, dim=0)
-
+   
     return loss(prediction_2, target_2)
 
 
@@ -87,6 +87,7 @@ def train(dataset, num_epochs, batch_size=1):
     val_losses = []
     avg_train_losses = []
     avg_val_losses = []
+    accuracies = []
     patience = 20
 
     val_split = int(len(dataset)*0.15)
@@ -146,11 +147,16 @@ def train(dataset, num_epochs, batch_size=1):
 
         avg_val_loss = np.average(val_losses)
         avg_val_losses.append(avg_val_loss)
+
+        accuracy = validate(val_loader, model)
+
+        accuracies.append(accuracy)
+
         model.train()
 
         bar.set_description(
-            'train_loss {:.3f}; val_loss {:.3f}'.format(
-                avg_train_losses[-1], avg_val_losses[-1])
+            'train_loss {:.3f}; val_loss {:.3f}, val_accuracy {:.3f}'.format(
+                avg_train_losses[-1], avg_val_losses[-1], accuracies[-1])
         )
 
         if epoch > 0 and epoch % 10 == 0:
@@ -176,21 +182,18 @@ def train(dataset, num_epochs, batch_size=1):
     return model, avg_val_losses, avg_train_losses
 
 
-def validate(val_set, model):
+def validate(val_loader, model):
     correct = 0
     total = 0
-    val_loader = torch.utils.data.DataLoader(
-        val_set, batch_size=1, num_workers=2)
-    #val_loader = torch.nn.utils.rnn.pad_packed_sequence(val_loader)
-
     model.eval()
     for point in tqdm(val_loader):
         sample, target = point
-        sample = torch.nn.utils.rnn.pad_packed_sequence(sample)
         output = model.forward(sample)
-        _, prediction = torch.max(output, 1)
+        
+        _, prediction = torch.max(prediction_2, dim=1)
+ 
         correct += (prediction == target).sum()
-        total += target.shape[0]
+        total += target.shape[1]
     accuracy = correct / total * 100
 
     return accuracy
