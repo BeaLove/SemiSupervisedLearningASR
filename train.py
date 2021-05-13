@@ -149,10 +149,10 @@ def train(dataset, num_epochs, batch_size=1):
             loss_value = loss_fn(model, loss, device, data, target)
             val_losses.append(loss_value.item())
             print('local value')
-            print(loss_value)
+            print(loss_value.item())
             print('minimum value loss')
-            print(min_val_loss)
-            if loss_value < min_val_loss:
+            print(min_val_loss.item())
+            if loss_value.item() < min_val_loss.item():
                 epochs_no_improve = 0
                 min_val_loss = loss_value
                 print("NONE IMPROVEMENT")
