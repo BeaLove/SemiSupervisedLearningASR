@@ -78,7 +78,7 @@ def loss_fn(model, loss, device, data, target):
 
     prediction_2 = torch.squeeze(prediction, dim=0)
     target_2 = torch.squeeze(target, dim=0)
-   
+
     return loss(prediction_2, target_2)
 
 
@@ -192,9 +192,10 @@ def validate(val_loader, model, device):
         target = target.to(device)
 
         output = model.forward(sample)
-        
+
+        output = torch.squeeze(output, dim=0)
         _, prediction = torch.max(output, dim=1)
- 
+
         correct += (prediction == target).sum()
         total += target.shape[1]
     accuracy = correct / total * 100
