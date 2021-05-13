@@ -71,7 +71,7 @@ class TimitDataset(Dataset):
             if(max_len < sample['max_frames']):
                 sample_audio = sample['audio'].numpy()
                 sample_audio = sample_audio[0:max_len,:]
-                sample['audio'] = torch.tensor(sample_audio, dtype=torch.long)
+                sample['audio'] = torch.tensor(sample_audio, dtype=torch.float)
 
         return sample
 
