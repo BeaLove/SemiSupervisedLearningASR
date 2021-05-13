@@ -39,7 +39,7 @@ def main(argv):
     # Initialize a Corpus object
     example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  #SA1.wav.WAV
     #dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
-    dataset_dir = 'timit'
+    dataset_dir = '../timit'
     corpus = Corpus(dataset_dir, example_file_dir) # TIMIT corpus
     phonemes = corpus.get_phonemes()  # List of phonemes
     targets = len(phonemes)  # Number of categories
@@ -119,7 +119,6 @@ def plot_loss(loss_train, loss_val, num_epochs):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.show()
     
     # Write loss plot to disk
     plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'loss_plot.png')))
