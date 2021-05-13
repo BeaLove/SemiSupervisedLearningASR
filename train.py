@@ -148,7 +148,7 @@ def train(dataset, num_epochs, batch_size=1):
         avg_val_loss = np.average(val_losses)
         avg_val_losses.append(avg_val_loss)
 
-        accuracy = validate(val_loader, model)
+        accuracy = validate(val_loader, model, device)
 
         accuracies.append(accuracy)
 
@@ -182,7 +182,7 @@ def train(dataset, num_epochs, batch_size=1):
     return model, avg_val_losses, avg_train_losses
 
 
-def validate(val_loader, model):
+def validate(val_loader, model, device):
     correct = 0
     total = 0
     model.eval()
