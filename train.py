@@ -148,20 +148,18 @@ def train(dataset, num_epochs, batch_size=1):
         for data, target in val_loader:
             loss_value = loss_fn(model, loss, device, data, target)
             val_losses.append(loss_value.item())
-            print('local value')
-            print(val_losses)
-            print('minimum value loss')
-            print(min_val_loss)
-#             if loss_value < min_val_loss:
-            if val_losses < min_val_loss:
+#             print('local value')
+#             print(val_losses)
+#             print('minimum value loss')
+#             print(min_val_loss)
+            if loss_value < min_val_loss:
                 epochs_no_improve = 0
-#                 min_val_loss = loss_value
-                min_val_loss = val_losses
-                print("NONE IMPROVEMENT")
+                min_val_loss = loss_value
+#                 print("NONE IMPROVEMENT")
                 torch.save(model.state_dict(), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
             else:
                 epochs_no_improve += 1
-                print("IMPROVE epochs ")
+#                 print("IMPROVE epochs ")
             if epoch > min_epochs and epochs_no_improve == patience:
                 print("Early stopping!")
                 early_stop = True
