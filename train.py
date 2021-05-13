@@ -155,6 +155,7 @@ def train(dataset, num_epochs, batch_size=1):
             if loss_value < min_val_loss:
                 epochs_no_improve = 0
                 min_val_loss = loss_value
+                print("NONE IMPROVEMENT")
                 torch.save(model.state_dict(), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
             else:
                 epochs_no_improve += 1
