@@ -158,6 +158,7 @@ def train(dataset, num_epochs, batch_size=1):
                 torch.save(model.state_dict(), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
             else:
                 epochs_no_improve += 1
+                print("IMPROVE epochs ")
             if epoch > min_epochs and epochs_no_improve == patience:
                 print("Early stopping!")
                 early_stop = True
