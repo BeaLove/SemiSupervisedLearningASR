@@ -40,8 +40,8 @@ def main(argv):
     
     # Initialize a Corpus object
     example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  #SA1.wav.WAV
-    #dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
-    dataset_dir = 'timit'
+    dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
+    #dataset_dir = 'timit'
     corpus = Corpus(dataset_dir, example_file_dir) # TIMIT corpus
     phonemes = corpus.get_phonemes()  # List of phonemes
     targets = len(phonemes)  # Number of categories
@@ -236,7 +236,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         test_accuracies.append(accuracy3)
 
         bar.set_description(
-            'train_loss {:.3f}; val_loss {:.3f}, test_accuracy {:.3f}, val_accuracy {:.3f}'.format(
+            'train_loss {:.3f}; val_loss {:.3f}, train_accuracy {:.3f}, val_accuracy {:.3f}, test_accuracy {:.3f}'.format(
                 avg_train_losses[-1], avg_val_losses[-1], train_accuracies[-1], val_accuracies[-1])
         )
 
@@ -405,7 +405,7 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 200, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
     flags.DEFINE_string('dataset_root_dir', 'timit',
                         'The path to the dataset root directory')
