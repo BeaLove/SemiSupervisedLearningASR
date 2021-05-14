@@ -108,7 +108,7 @@ def main(argv):
     plot_loss(avg_train_losses, avg_val_losses, epochNum)
     plot_accuracy(train_accuracies, val_accuracies, test_accuracies, epochNum)
     
-    print("accuracy:", acc)
+    print("Final test accuracy:", acc)
     
 # ------------------------------------------- ON DIRECTORY -------------------------------------------
 
@@ -237,7 +237,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
         bar.set_description(
             'train_loss {:.3f}; val_loss {:.3f}, train_accuracy {:.3f}, val_accuracy {:.3f}, test_accuracy {:.3f}'.format(
-                avg_train_losses[-1], avg_val_losses[-1], train_accuracies[-1], val_accuracies[-1])
+                avg_train_losses[-1], avg_val_losses[-1], train_accuracies[-1], val_accuracies[-1], test_accuracies[-1])
         )
 
         if epoch > 0 and epoch % 10 == 0:
