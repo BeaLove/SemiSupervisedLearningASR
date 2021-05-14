@@ -36,10 +36,12 @@ def main(argv):
     """
     del argv  # Unused.
     
+    set_seeds(0)
+    
     # Initialize a Corpus object
     example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  #SA1.wav.WAV
-    dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
-    #dataset_dir = 'timit'
+    #dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
+    dataset_dir = 'timit'
     corpus = Corpus(dataset_dir, example_file_dir) # TIMIT corpus
     phonemes = corpus.get_phonemes()  # List of phonemes
     targets = len(phonemes)  # Number of categories
@@ -128,6 +130,7 @@ def plot_loss(loss_train, loss_val, num_epochs):
     plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'loss_plot.png')))
 
 def plot_accuracy(acc_train, acc_val, acc_test, num_epochs):
+    plt.clf()
     epochs = range(1, num_epochs + 1)
     plt.plot(epochs, acc_train, 'g', label='Training accuracy')
     plt.plot(epochs, acc_val, 'b', label='validation accuracy')
@@ -384,6 +387,14 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad = False, oneTensor = 
         tensors = torch.tensor(whole.tolist(), dtype = torch.long)
 
     return tensors
+
+def set_seeds(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    return
 
 if __name__ == '__main__':
     flags.DEFINE_integer('n_fft', 512, 'Size of FFT')
