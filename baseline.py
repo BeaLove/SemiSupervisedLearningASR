@@ -40,7 +40,7 @@ class Baseline(nn.Module):
         return loss(outputs, labels)
 
     def forward(self, x):
-        return self.model(x)
+        return torch.squeeze(self.model(x), dim=0)
 
     def loss_fn(self, outputs, labels):
         return self.criterion(outputs, labels)
