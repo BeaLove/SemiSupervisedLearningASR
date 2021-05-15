@@ -22,7 +22,7 @@ class MeanTeacher(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-    def __init__(self, mfccs, output_phonemes, size_hidden_layers, ema_decay=0.999, consistency_weight=50.0):
+    def __init__(self, mfccs, output_phonemes, size_hidden_layers, ema_decay=0.999, consistency_weight=1.0):
         super(MeanTeacher, self).__init__()
 
         self.name = 'MeanTeacher'
@@ -74,10 +74,10 @@ class MeanTeacher(nn.Module):
         target = torch.squeeze(target, dim=0)
         loss_class = self.criterion(self.forward_student(l_data), target)
 
-        loss_consitency = self.consistency_criterion(
+        loss_consistency = self.consistency_criterion(
             self.forward_student(u_data), self.forward_teacher(u_data))
 
-        loss = loss_class + self.consistency_weight * loss_consitency
+        loss = loss_class + self.consistency_weight * loss_consistency
 
         loss.backward()
 
