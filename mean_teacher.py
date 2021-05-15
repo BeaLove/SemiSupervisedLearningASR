@@ -63,7 +63,7 @@ class MeanTeacher(nn.Module):
         return torch.squeeze(self.teacher(x), dim=0)
 
     def forward(self, x):
-        return forward_student(x)
+        return self.forward_student(x)
 
     def loss_fn(self, outputs, labels):
         return self.criterion(outputs, labels)
