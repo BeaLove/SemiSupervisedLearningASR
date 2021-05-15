@@ -50,7 +50,7 @@ def main(args):
     and fully trained model gets saved with correct name'''
 
     model, avg_val_losses, avg_train_losses = train(
-        dataset, method = FLAGS.method, num_epochs=FLAGS.num_epochs)
+        dataset, method=FLAGS.method, num_epochs=FLAGS.num_epochs)
 
     torch.save(model.state_dict(), save_path)
 
@@ -59,8 +59,14 @@ def main(args):
     np.savetxt(os.path.abspath(os.path.join(FLAGS.results_save_dir,
                'avg_train_losses.txt')), np.asarray(avg_train_losses), delimiter=',')
 
-    plt.plot(avg_train_losses)
-    plt.plot(avg_val_losses)
+    epochs = range(1, num_epochs + 1)
+    plt.plot(epochs, avg_train_losses, 'g', label='Training loss')
+    plt.plot(epochs, avg_val_losses, 'b', label='validation loss')
+    plt.title('Average training vs validation loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+
     plt.savefig(os.path.abspath(os.path.join(
         FLAGS.results_save_dir, 'loss_plot.png')))
 
@@ -144,11 +150,11 @@ def train(dataset, num_epochs, method, batch_size=1):
     #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     if method == 'mean_teacher':
         model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
-                        size_hidden_layers=100, ema_decay=0.999)
+                            size_hidden_layers=100, ema_decay=0.999)
 
     elif method == 'baseline':
         model = Baseline(FLAGS.num_ceps, dataset.num_labels,
-                        size_hidden_layers=100)
+                         size_hidden_layers=100)
     else:
         raise Exception('Wrong flag for method')
 
@@ -158,7 +164,6 @@ def train(dataset, num_epochs, method, batch_size=1):
     # optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
     #    0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     #early_stop = EarlyStopping(patience=patience, verbose=True)
-
 
     bar = tqdm(range(num_epochs))
 
@@ -177,7 +182,7 @@ def train(dataset, num_epochs, method, batch_size=1):
                 l_data, target, = next(l_iter)
 
             l_data, target = l_data.to(device), target.to(device)
-        
+
             loss_value = model.train_step(device, u_data, l_data, target)
 
             train_losses.append(loss_value.item())
@@ -294,8 +299,10 @@ if __name__ == '__main__':
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
     flags.DEFINE_string('loss', 'CrossEntropyLoss',
                         'The name of loss function')
-    flags.DEFINE_enum('method', 'baseline', ['baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
+    flags.DEFINE_enum('method', 'baseline', [
+                      'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
     flags.DEFINE_float('ratio_labeled_data', 0.1, 'Ratio of unlabeled data.')
-    flags.DEFINE_float('ratio_validation_data', 0.15, 'Ratio of validation data.')
+    flags.DEFINE_float('ratio_validation_data', 0.15,
+                       'Ratio of validation data.')
 
     app.run(main)
