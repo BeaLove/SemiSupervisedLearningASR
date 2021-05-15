@@ -94,7 +94,7 @@ def loss_fn(model, loss, device, data, target):
     return loss(prediction_2, target_2)
 
 
-def train(dataset, num_epochs, method, batch_size=10):
+def train(dataset, num_epochs, method, batch_size=1):
     train_losses = []
     val_losses = []
     avg_train_losses = []
