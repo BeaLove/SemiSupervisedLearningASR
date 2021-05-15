@@ -94,13 +94,13 @@ def loss_fn(model, loss, device, data, target):
     return loss(prediction_2, target_2)
 
 
-def train(dataset, num_epochs, method, batch_size=1):
+def train(dataset, num_epochs, method, batch_size=10):
     train_losses = []
     val_losses = []
     avg_train_losses = []
     avg_val_losses = []
     accuracies = []
-    patience = 3
+    patience = 20
     min_epochs = 5
     epochs_no_improve = 0
     early_stop = False
