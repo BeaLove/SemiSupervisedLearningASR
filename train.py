@@ -59,11 +59,11 @@ def main(args):
     np.savetxt(os.path.abspath(os.path.join(FLAGS.results_save_dir,
                'avg_train_losses.txt')), np.asarray(avg_train_losses), delimiter=',')
 
-    epochs = range(1, num_epochs + 1)
-    plt.plot(epochs, avg_train_losses, 'g', label='Training loss')
-    plt.plot(epochs, avg_val_losses, 'b', label='validation loss')
+    iterations = range(1, len(avg_train_losses)+1)
+    plt.plot(iterations, avg_train_losses, 'g', label='Training loss')
+    plt.plot(iterations, avg_val_losses, 'b', label='validation loss')
     plt.title('Average training vs validation loss')
-    plt.xlabel('Epochs')
+    plt.xlabel('Iterations')
     plt.ylabel('Loss')
     plt.legend()
 
