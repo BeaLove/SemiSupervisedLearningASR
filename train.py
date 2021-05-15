@@ -153,6 +153,7 @@ def train(dataset, num_epochs, method, batch_size=1):
         raise Exception('Wrong flag for method')
 
     model.to(device)
+    optimizer = model.get_optimizer()
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
     #    0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)

@@ -27,6 +27,8 @@ class MeanTeacher(nn.Module):
 
         self.name = 'MeanTeacher'
         self.consistency_weight = consistency_weight
+        self.std = 1.0
+        self.mean = 0.0
 
         self.student = LSTM(mfccs, output_phonemes, size_hidden_layers)
         self.teacher = LSTM(mfccs, output_phonemes, size_hidden_layers)
@@ -70,6 +72,9 @@ class MeanTeacher(nn.Module):
 
     def train_step(self, u_data, l_data, target):
         self.optimizer.zero_grad()
+
+        u_data = u_data + torch.randn(u_data.size()) * self.std + self.mean
+        l_data = l_data + torch.randn(l_data.size()) * self.std + self.mean
 
         target = torch.squeeze(target, dim=0)
         loss_class = self.criterion(self.forward_student(l_data), target)

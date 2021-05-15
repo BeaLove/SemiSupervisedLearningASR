@@ -39,6 +39,9 @@ class Baseline(nn.Module):
         loss = nn.CrossEntropyLoss()
         return loss(outputs, labels)
 
+    def get_optimizer(self):
+        return self.optimizer
+
     def forward(self, x):
         return torch.squeeze(self.model(x), dim=0)
 
