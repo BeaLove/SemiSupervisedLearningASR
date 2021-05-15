@@ -45,9 +45,6 @@ class MeanTeacher(nn.Module):
         self.student = self.student.to(device)
         self.teacher = self.teacher.to(device)
 
-    def get_optimizer(self):
-        return self.optimizer
-
     def consistency_criterion(self, teacher_outputs, student_outputs):
         loss = nn.MSELoss()
         return loss(teacher_outputs, student_outputs)

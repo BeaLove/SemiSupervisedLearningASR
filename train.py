@@ -17,6 +17,7 @@ from absl import flags
 from datasets.TIMITdataset import TimitDataset
 
 from mean_teacher import MeanTeacher
+from baseline import Baseline
 
 FLAGS = flags.FLAGS
 
@@ -49,7 +50,7 @@ def main(args):
     and fully trained model gets saved with correct name'''
 
     model, avg_val_losses, avg_train_losses = train(
-        dataset, num_epochs=FLAGS.num_epochs)
+        dataset, method = FLAGS.method, num_epochs=FLAGS.num_epochs)
 
     torch.save(model.state_dict(), save_path)
 
@@ -93,7 +94,7 @@ def loss_fn(model, loss, device, data, target):
     return loss(prediction_2, target_2)
 
 
-def train(dataset, num_epochs, batch_size=1):
+def train(dataset, num_epochs, method, batch_size=1):
     train_losses = []
     val_losses = []
     avg_train_losses = []
@@ -141,15 +142,22 @@ def train(dataset, num_epochs, batch_size=1):
     #                  layer_dim=1, output_dim=dataset.num_labels)
 
     #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
-    model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
+    if method == 'mean_teacher':
+        model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
                         size_hidden_layers=100, ema_decay=0.999)
+
+    elif method == 'baseline':
+        model = Baseline(FLAGS.num_ceps, dataset.num_labels,
+                        size_hidden_layers=100)
+    else:
+        raise Exception('Wrong flag for method')
+
     model.to(device)
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
     #    0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     #early_stop = EarlyStopping(patience=patience, verbose=True)
 
-    optimizer = model.get_optimizer()
 
     bar = tqdm(range(num_epochs))
 
@@ -285,5 +293,6 @@ if __name__ == '__main__':
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
     flags.DEFINE_string('loss', 'CrossEntropyLoss',
                         'The name of loss function')
+    flags.DEFINE_enum('method', 'baseline', ['baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
 
     app.run(main)
