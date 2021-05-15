@@ -248,7 +248,7 @@ def validate(val_loader, model, device):
     correct = 0
     total = 0
     model.eval()
-    for point in tqdm(val_loader):
+    for point in val_loader:
         sample, target = point
         sample = sample.to(device)
         target = target.to(device)
