@@ -91,6 +91,10 @@ def main(argv):
     model, avg_val_losses, avg_train_losses, train_accuracies, val_accuracies, test_accuracies = trainModel(train_data, train_targets, test_data, test_targets, len(train_dataset), len(test_dataset), corpus, num_epochs=epochNum)
     torch.save(model.state_dict(), save_path)
     timestamp = str(datetime.now())
+
+    acc = testModel(test_data, test_targets, len(test_dataset), model)
+    plot_loss(avg_train_losses, avg_val_losses, epochNum)
+    plot_accuracy(train_accuracies, val_accuracies, test_accuracies, epochNum)
     
     # Write validation loss to disk
     with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'avg_val_losses.txt')), 'a') as valLossFile:
@@ -103,10 +107,24 @@ def main(argv):
         trainLossFile.write(timestamp)
         trainLossFile.write('\n')
         trainLossFile.writelines(str(avg_train_losses))
-
-    acc = testModel(test_data, test_targets, len(test_dataset), model)
-    plot_loss(avg_train_losses, avg_val_losses, epochNum)
-    plot_accuracy(train_accuracies, val_accuracies, test_accuracies, epochNum)
+    
+    # Write training accuracy to disk
+    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'train_accuracy.txt')), 'a') as val1File:
+        val1File.write(timestamp)
+        val1File.write('\n')
+        val1File.writelines(str(train_accuracies))
+    
+    # Write validation accuracy to disk
+    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'validation_accuracy.txt')), 'a') as val2File:
+        val2File.write(timestamp)
+        val2File.write('\n')
+        val2File.writelines(str(val_accuracies))
+    
+    # Write test accuracy to disk
+    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'test_accuracy.txt')), 'a') as val3File:
+        val3File.write(timestamp)
+        val3File.write('\n')
+        val3File.writelines(str(test_accuracies))
     
     print("Final test accuracy:", acc)
     
@@ -405,7 +423,7 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 200, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 60, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
     flags.DEFINE_string('dataset_root_dir', 'timit',
                         'The path to the dataset root directory')
