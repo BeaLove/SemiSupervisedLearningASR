@@ -48,7 +48,7 @@ class Baseline(nn.Module):
     def loss_fn(self, outputs, labels):
         return self.criterion(outputs, labels)
 
-    def train_step(self, u_data, l_data, target):
+    def train_step(self, device, u_data, l_data, target):
         self.optimizer.zero_grad()
 
         target = torch.squeeze(target, dim=0)

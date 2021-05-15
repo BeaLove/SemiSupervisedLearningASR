@@ -178,7 +178,7 @@ def train(dataset, num_epochs, method, batch_size=1):
 
             l_data, target = l_data.to(device), target.to(device)
         
-            loss_value = model.train_step(u_data, l_data, target)
+            loss_value = model.train_step(device, u_data, l_data, target)
 
             train_losses.append(loss_value.item())
 

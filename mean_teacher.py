@@ -70,11 +70,12 @@ class MeanTeacher(nn.Module):
     def loss_fn(self, outputs, labels):
         return self.criterion(outputs, labels)
 
-    def train_step(self, u_data, l_data, target):
+    def train_step(self, device, u_data, l_data, target):
         self.optimizer.zero_grad()
 
-        u_data = u_data + torch.randn(u_data.size()) * self.std + self.mean
-        l_data = l_data + torch.randn(l_data.size()) * self.std + self.mean
+        u_data = u_data + torch.randn(u_data.size()).to(device) * self.std + self.mean
+        l_data = l_data + torch.randn(l_data.size()).to(device) * self.std + self.mean
+
 
         target = torch.squeeze(target, dim=0)
         loss_class = self.criterion(self.forward_student(l_data), target)
