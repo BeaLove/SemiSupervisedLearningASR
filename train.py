@@ -106,11 +106,11 @@ def train(dataset, num_epochs, method, batch_size=1):
     early_stop = False
     min_val_loss = np.inf
 
-    val_split = int(len(dataset)*0.15)
+    val_split = int(len(dataset)*FLAGS.ratio_validation_data)
     train_data, val_data = torch.utils.data.random_split(dataset, [len(dataset) - val_split, val_split],
                                                          generator=torch.Generator().manual_seed(15))
 
-    unlabeled_split = int(len(train_data)*0.9)
+    unlabeled_split = int(len(train_data)*(1 - FLAGS.ratio_labeled_data))
     labeled_train_data, unlabeled_train_data = torch.utils.data.random_split(train_data, [len(train_data) - unlabeled_split, unlabeled_split],
                                                                              generator=torch.Generator().manual_seed(15))
 
@@ -294,5 +294,7 @@ if __name__ == '__main__':
     flags.DEFINE_string('loss', 'CrossEntropyLoss',
                         'The name of loss function')
     flags.DEFINE_enum('method', 'baseline', ['baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
+    flags.DEFINE_float('ratio_labeled_data', 0.1, 'Ratio of unlabeled data.')
+    flags.DEFINE_float('ratio_validation_data', 0.15, 'Ratio of validation data.')
 
     app.run(main)

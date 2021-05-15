@@ -39,7 +39,6 @@ class Baseline(nn.Module):
         loss = nn.CrossEntropyLoss()
         return loss(outputs, labels)
 
-
     def forward(self, x):
         return self.model(x)
 
@@ -50,7 +49,7 @@ class Baseline(nn.Module):
         self.optimizer.zero_grad()
 
         target = torch.squeeze(target, dim=0)
-        loss = self.criterion(self.forward_student(l_data), target)
+        loss = self.criterion(self.model(l_data), target)
 
         loss.backward()
 
