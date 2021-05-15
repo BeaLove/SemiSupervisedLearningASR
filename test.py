@@ -26,7 +26,7 @@ def test_model(model, test_data):
         prediction = torch.max(output.squeeze(), dim=1).indices
 
         correct += (prediction == target).float().sum()
-        total += target.shape[0]
+        total += target.shape[1]
     accuracy = correct/total * 100
     timestamp = datetime.now()
     with open('accuracy' + str(model.name) + '.txt', 'a') as file:
