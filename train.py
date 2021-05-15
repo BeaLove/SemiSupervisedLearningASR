@@ -16,6 +16,8 @@ from models.lstm1 import LSTM
 from absl import flags
 from datasets.TIMITdataset import TimitDataset
 
+from mean_teacher import MeanTeacher
+
 FLAGS = flags.FLAGS
 
 
@@ -74,6 +76,15 @@ def main(args):
 def loss_fn(model, loss, device, data, target):
     data = data.to(device)
     target = target.to(device)
+    target = torch.squeeze(target, dim=0)
+
+    output_teacher, output_student = mean_teacher.forward(data)
+
+    output_teacher, output_student = torch.squeeze(
+        output_teacher, dim=0), torch.squeeze(output_student, dim=0)
+
+    prediction_2 = torch.squeeze(prediction, dim=0)
+
     prediction = model.forward(data)
 
     prediction_2 = torch.squeeze(prediction, dim=0)
@@ -97,6 +108,11 @@ def train(dataset, num_epochs, batch_size=1):
     val_split = int(len(dataset)*0.15)
     train_data, val_data = torch.utils.data.random_split(dataset, [len(dataset) - val_split, val_split],
                                                          generator=torch.Generator().manual_seed(15))
+
+    unlabeled_split = int(len(train_data)*0.9)
+    labeled_train_data, unlabeled_train_data = torch.utils.data.random_split(train_data, [len(train_data) - unlabeled_split, unlabeled_split],
+                                                                             generator=torch.Generator().manual_seed(15))
+
     if torch.cuda.is_available():
         print('using cuda')
         device = torch.device('cuda:0')
@@ -104,8 +120,11 @@ def train(dataset, num_epochs, batch_size=1):
         print('using cpu')
         device = torch.device('cpu')
 
-    train_loader = torch.utils.data.DataLoader(
-        train_data, batch_size=batch_size, num_workers=3, shuffle=True)
+    labeled_train_loader = torch.utils.data.DataLoader(
+        labeled_train_data, batch_size=batch_size, num_workers=3, shuffle=True)
+
+    unlabeled_train_loader = torch.utils.data.DataLoader(
+        unlabeled_train_data, batch_size=batch_size, num_workers=3, shuffle=True)
     '''if batch_size > 1:
         train_loader = torch.nn.utils.rnn.pad_packed_sequence(train_loader)'''
     val_loader = torch.utils.data.DataLoader(
@@ -121,24 +140,36 @@ def train(dataset, num_epochs, batch_size=1):
     # model = LSTMModel(input_dim=13, hidden_dim=500,
     #                  layer_dim=1, output_dim=dataset.num_labels)
 
-    model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
+    #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
+    model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
+                        size_hidden_layers=100, ema_decay=0.999)
     model.to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
-        0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
+    #    0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     #early_stop = EarlyStopping(patience=patience, verbose=True)
+
+    optimizer = model.get_optimizer()
 
     bar = tqdm(range(num_epochs))
 
     for epoch in bar:
 
-        for batch in train_loader:
-            data, target = batch
+        l_iter = iter(labeled_train_loader)
 
-            optimizer.zero_grad()
-            loss_value = loss_fn(model, loss, device, data, target)
-            loss_value.backward()
-            optimizer.step()
+        for u_batch in unlabeled_train_loader:
+            u_data, _ = u_batch
+            u_data = u_data.to(device)
+
+            try:
+                l_data, target, = next(l_iter)
+            except StopIteration:
+                l_iter = iter(labeled_train_loader)
+                l_data, target, = next(l_iter)
+
+            l_data, target = l_data.to(device), target.to(device)
+        
+            loss_value = model.train_step(u_data, l_data, target)
 
             train_losses.append(loss_value.item())
 
@@ -146,7 +177,13 @@ def train(dataset, num_epochs, batch_size=1):
 
         model.eval()
         for data, target in val_loader:
-            loss_value = loss_fn(model, loss, device, data, target)
+            data, target = data.to(device), target.to(device)
+            target = torch.squeeze(target, dim=0)
+
+            output = model.forward(data)
+
+            loss_value = model.loss_fn(output, target)
+
             val_losses.append(loss_value.item())
 #             print('local value')
 #             print(val_losses)
@@ -156,7 +193,8 @@ def train(dataset, num_epochs, batch_size=1):
                 epochs_no_improve = 0
                 min_val_loss = loss_value
 #                 print("NONE IMPROVEMENT")
-                torch.save(model.state_dict(), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
+                torch.save(model.state_dict(
+                ), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
             else:
                 epochs_no_improve += 1
 #                 print("IMPROVE epochs ")
@@ -216,8 +254,6 @@ def validate(val_loader, model, device):
         target = target.to(device)
 
         output = model.forward(sample)
-
-        output = torch.squeeze(output, dim=0)
         _, prediction = torch.max(output, dim=1)
 
         correct += (prediction == target).sum()
@@ -239,7 +275,7 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 100, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
     flags.DEFINE_string('dataset_root_dir', 'timit',
                         'The path to the dataset root directory')

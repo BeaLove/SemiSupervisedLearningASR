@@ -21,7 +21,7 @@ def test_model(model, test_data):
         sample, target = point
         sample = sample.to(device)
         target = target.to(device)
-        output = model.forward(sample)
+        _, output = model.forward(sample)
 
         prediction = torch.max(output.squeeze(), dim=1).indices
 
