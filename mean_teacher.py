@@ -40,8 +40,8 @@ class MeanTeacher(nn.Module):
         self.ema_optimizer = WeightEMA(
             model=self.student, ema_model=self.teacher, alpha=ema_decay)
 
-        self.optimizer = torch.optim.Adam(self.student.parameters(), lr=0.001, betas=(
-            0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+        self.optimizer = torch.optim.Adam(self.student.parameters(), lr=0.001)
+
 
     def to(self, device):
         self.student = self.student.to(device)

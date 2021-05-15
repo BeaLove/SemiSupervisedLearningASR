@@ -29,8 +29,7 @@ class Baseline(nn.Module):
 
         self.model = LSTM(mfccs, output_phonemes, size_hidden_layers)
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001, betas=(
-            0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
 
     def to(self, device):
         self.model = self.model.to(device)
