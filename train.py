@@ -150,7 +150,7 @@ def train(dataset, num_epochs, method, batch_size=1):
     #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     if method == 'mean_teacher':
         model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
-                            size_hidden_layers=100, ema_decay=0.999)
+                            size_hidden_layers=100, max_steps = len(unlabeled_train_loader) * num_epochs, ema_decay=0.999)
 
     elif method == 'baseline':
         model = Baseline(FLAGS.num_ceps, dataset.num_labels,

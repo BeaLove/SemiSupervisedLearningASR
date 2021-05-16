@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from optimizers.ema import WeightEMA
+from optimizers.ema import ExponetialMovingAverage
 from models.lstm1 import LSTM
 from torch.autograd import Variable
 
@@ -22,11 +22,14 @@ class MeanTeacher(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-    def __init__(self, mfccs, output_phonemes, size_hidden_layers, ema_decay=0.999, consistency_weight=1.0):
+    def __init__(self, mfccs, output_phonemes, size_hidden_layers, max_steps=10000, ema_decay=0.999, consistency_weight=50.0):
         super(MeanTeacher, self).__init__()
 
         self.name = 'MeanTeacher'
         self.consistency_weight = consistency_weight
+        self.max_steps = max_steps
+        self.step = 0
+
         self.std = 1.0
         self.mean = 0.0
 
@@ -37,11 +40,10 @@ class MeanTeacher(nn.Module):
         for param in self.teacher.parameters():
             param.detach_()
 
-        self.ema_optimizer = WeightEMA(
+        self.ema_optimizer = ExponetialMovingAverage(
             model=self.student, ema_model=self.teacher, alpha=ema_decay)
 
         self.optimizer = torch.optim.Adam(self.student.parameters(), lr=0.001)
-
 
     def to(self, device):
         self.student = self.student.to(device)
@@ -73,9 +75,10 @@ class MeanTeacher(nn.Module):
     def train_step(self, device, u_data, l_data, target):
         self.optimizer.zero_grad()
 
-        u_data = u_data + torch.randn(u_data.size()).to(device) * self.std + self.mean
-        l_data = l_data + torch.randn(l_data.size()).to(device) * self.std + self.mean
-
+        u_data = u_data + \
+            torch.randn(u_data.size()).to(device) * self.std + self.mean
+        l_data = l_data + \
+            torch.randn(l_data.size()).to(device) * self.std + self.mean
 
         target = torch.squeeze(target, dim=0)
         loss_class = self.criterion(self.forward_student(l_data), target)
@@ -83,11 +86,17 @@ class MeanTeacher(nn.Module):
         loss_consistency = self.consistency_criterion(
             self.forward_student(u_data), self.forward_teacher(u_data))
 
-        loss = loss_class + self.consistency_weight * loss_consistency
+        loss = loss_class + self.consistency_weight * \
+            loss_consistency * self.linear_ramp_up()
 
         loss.backward()
 
         self.optimizer.step()
         self.ema_optimizer.step()
 
+        self.step += 1
+
         return loss
+
+    def linear_ramp_up(self):
+        return float(self.step) / self.max_steps
