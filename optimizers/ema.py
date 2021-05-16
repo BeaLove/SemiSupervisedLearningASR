@@ -8,7 +8,7 @@ class ExponetialMovingAverage(object):
         self.alpha = alpha
 
     def step(self):
-        for param, ema_param in zip(list(self.model.state_dict().values()), list(self.ema_model.state_dict().values())):
-            if ema_param.dtype == torch.float32:
-                ema_param.mul_(self.alpha)
-                ema_param.add_(param * (1.0 - self.alpha))
+
+        for param, ema_param in zip(self.model.parameters(), self.ema_model.parameters()):
+            ema_param.data.mul_(self.alpha)
+            ema_param.dataadd_(param.data, 1 - self.alpha)
