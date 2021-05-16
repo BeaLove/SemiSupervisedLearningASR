@@ -31,7 +31,7 @@ class MeanTeacher(nn.Module):
         self.max_steps = max_steps
         self.step = 0
 
-        self.std = 10.0
+        self.std = 5.0
         self.mean = 0.0
 
         self.student = LSTM(mfccs, output_phonemes, size_hidden_layers)
