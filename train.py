@@ -155,7 +155,7 @@ def train(dataset, num_epochs, method, batch_size=1):
     if method == 'mean_teacher':
         consistency_rampup = len(unlabeled_train_loader) * 5
         model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
-                            size_hidden_layers=100, max_steps = consistency_rampup, ema_decay=0.999)
+                            size_hidden_layers=100, max_steps=consistency_rampup, ema_decay=0.999)
 
     elif method == 'baseline':
         model = Baseline(FLAGS.num_ceps, dataset.num_labels,
@@ -163,9 +163,8 @@ def train(dataset, num_epochs, method, batch_size=1):
     else:
         raise Exception('Wrong flag for method')
 
-
     logging.info("Method: {}".format(method))
-    
+
     model.to(device)
     optimizer = model.get_optimizer()
 
@@ -181,6 +180,8 @@ def train(dataset, num_epochs, method, batch_size=1):
 
         for u_batch in unlabeled_train_loader:
             u_data, _ = u_batch
+
+
             u_data = u_data.to(device)
 
             try:
