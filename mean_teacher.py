@@ -37,8 +37,7 @@ class MeanTeacher(nn.Module):
         self.teacher = LSTM(mfccs, output_phonemes, size_hidden_layers)
 
         self.teacher.load_state_dict(self.student.state_dict())
-        for param in self.teacher.parameters():
-            param.detach_()
+
 
         self.ema_optimizer = ExponetialMovingAverage(
             model=self.student, ema_model=self.teacher, alpha=ema_decay)
@@ -99,4 +98,4 @@ class MeanTeacher(nn.Module):
         return loss
 
     def linear_ramp_up(self):
-        return float(self.step) / self.max_steps
+        return min(float(self.step) / self.max_steps, 1.0)
