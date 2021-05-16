@@ -14,5 +14,5 @@ class LSTM(nn.Module):
 
     def forward(self, x):
         x, _ = self.hidden_layers(x)
-        x = self.output_layer(x)
-        return F.log_softmax(x, dim=1)
+        return self.output_layer(x)
+
