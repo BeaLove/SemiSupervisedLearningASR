@@ -19,6 +19,10 @@ from datasets.TIMITdataset import TimitDataset
 from mean_teacher import MeanTeacher
 from baseline import Baseline
 
+from absl import logging
+
+logging.set_verbosity(logging.INFO)
+
 FLAGS = flags.FLAGS
 
 
@@ -121,10 +125,10 @@ def train(dataset, num_epochs, method, batch_size=1):
                                                                              generator=torch.Generator().manual_seed(15))
 
     if torch.cuda.is_available():
-        print('using cuda')
+        logging.info('Using cuda')
         device = torch.device('cuda:0')
     else:
-        print('using cpu')
+        logging.info('Using cpu')
         device = torch.device('cpu')
 
     labeled_train_loader = torch.utils.data.DataLoader(
@@ -159,6 +163,9 @@ def train(dataset, num_epochs, method, batch_size=1):
     else:
         raise Exception('Wrong flag for method')
 
+
+    logging.info("Method: {}".format(method))
+    
     model.to(device)
     optimizer = model.get_optimizer()
 

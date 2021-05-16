@@ -11,9 +11,10 @@ from torch.autograd import Variable
 
 class MeanTeacher(nn.Module):
 
-    # Todo
-    # Loss
-    # Dropout or add noise - read how
+    # Problems?
+    # 1. Random aug. or noise
+    # 2. No softmax is used
+    # 3. Batch size = 1. In the paper they have for example 40 unlabeled samples and 20 labeled samples in the batch
 
     # Mean Teacher algorithm:
     # 1. Take a supervised architecture and make a copy of it. Let's call the original model the student and the new one the teacher.
