@@ -19,10 +19,12 @@ class Baseline(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-    def __init__(self, mfccs, output_phonemes, size_hidden_layers):
+    def __init__(self, loss, mfccs, output_phonemes, size_hidden_layers):
         super(Baseline, self).__init__()
 
         self.name = 'Baseline'
+
+        self.loss = loss
 
         self.model = LSTM(mfccs, output_phonemes, size_hidden_layers)
 
@@ -31,27 +33,25 @@ class Baseline(nn.Module):
     def to(self, device):
         self.model = self.model.to(device)
 
-    def criterion(self, outputs, labels):
-        loss = nn.CrossEntropyLoss()
-        return loss(outputs, labels)
-
     def get_optimizer(self):
         return self.optimizer
 
     def forward(self, x):
-        return torch.squeeze(self.model(x), dim=0)
+        return self.model(x)
 
-    def loss_fn(self, outputs, labels):
-        return self.criterion(outputs, labels)
+    def loss_fn(self, device, data, target):
+        data = data.to(device)
+        target = target.to(device)
+        prediction = self.model.forward(data)
+        prediction = torch.squeeze(prediction, dim=1)
+
+        return self.loss(prediction, target)
 
     def train_step(self, device, u_data, l_data, target):
+
         self.optimizer.zero_grad()
-
-        target = torch.squeeze(target, dim=0)
-        loss = self.criterion(self.forward(l_data), target)
-
-        loss.backward()
-
+        loss_val = self.loss_fn(device, l_data, target)
+        loss_val.backward()
         self.optimizer.step()
 
-        return loss
+        return loss_val

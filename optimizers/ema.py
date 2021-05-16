@@ -10,4 +10,6 @@ class ExponetialMovingAverage(object):
     def step(self):
 
         for param, ema_param in zip(self.model.parameters(), self.ema_model.parameters()):
-            ema_param.data.mul_(self.alpha).add_(1 - self.alpha)
+            ema_param.data.mul_(self.alpha).add_((1 - self.alpha) * param)
+
+            #w = w * 0.99 + 0.01 * new_w
