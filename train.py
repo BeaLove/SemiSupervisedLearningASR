@@ -154,8 +154,10 @@ def train(dataset, num_epochs, method, batch_size=1):
     #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     if method == 'mean_teacher':
         consistency_rampup = len(unlabeled_train_loader) * 5
+        
         model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
-                            size_hidden_layers=100, max_steps=consistency_rampup, ema_decay=0.999)
+                            size_hidden_layers=100, max_steps=consistency_rampup,
+                            ema_decay=0.999, consistency_weight=FLAGS.consistency_weight)
 
     elif method == 'baseline':
         model = Baseline(FLAGS.num_ceps, dataset.num_labels,
@@ -180,7 +182,6 @@ def train(dataset, num_epochs, method, batch_size=1):
 
         for u_batch in unlabeled_train_loader:
             u_data, _ = u_batch
-
 
             u_data = u_data.to(device)
 
@@ -313,5 +314,7 @@ if __name__ == '__main__':
     flags.DEFINE_float('ratio_labeled_data', 0.1, 'Ratio of unlabeled data.')
     flags.DEFINE_float('ratio_validation_data', 0.15,
                        'Ratio of validation data.')
+    flags.DEFINE_float('consistency_weight', 1.0,
+                       'The consistency weight for the mean teacher loss.')
 
     app.run(main)
