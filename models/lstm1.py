@@ -9,7 +9,7 @@ class LSTM(nn.Module):
         '''input: number of mfcc coefficients, number of output phonemes, layer dimensions in a list
                 '''
         self.name = name
-        self.hidden_layers = nn.LSTM(mfccs, size_hidden_layers, dropout = 0.05, num_layers = 2, batch_first= False)
+        self.hidden_layers = nn.LSTM(mfccs, size_hidden_layers, dropout = 0.5, num_layers = 2, batch_first= False)
         self.output_layer = nn.Linear(size_hidden_layers, output_phonemes)
 
     def forward(self, x):
