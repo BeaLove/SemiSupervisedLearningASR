@@ -1,5 +1,6 @@
 import torch.cuda
 import torch.nn as nn
+import torch.nn.functional as F
 
 class LSTM(nn.Module):
 
@@ -13,4 +14,5 @@ class LSTM(nn.Module):
 
     def forward(self, x):
         x, _ = self.hidden_layers(x)
-        return self.output_layer(x)
+        x = self.output_layer(x)
+        return F.log_softmax(x, dim=1)
