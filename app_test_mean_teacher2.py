@@ -202,7 +202,17 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     else:
         loss = nn.CrossEntropyLoss()
 
-    model = Baseline(loss, mfccs = FLAGS.num_ceps, output_phonemes = corpus.get_phones_len(), size_hidden_layers=100)
+    if FLAGS.method == 'mean_teacher':
+        consistency_rampup = len(train_data) * 5
+
+        model = MeanTeacher(FLAGS.num_ceps, corpus.get_phones_len(),
+                        size_hidden_layers=100, max_steps=consistency_rampup,
+                        ema_decay=0.999, consistency_weight=FLAGS.consistency_weight)
+
+    elif FLAGS.method == 'baseline':
+         model = Baseline(loss, mfccs = FLAGS.num_ceps, output_phonemes = corpus.get_phones_len(), size_hidden_layers=100)
+    else:
+        raise Exception('Wrong flag for method')
     model.to(device)
     
     # Configuring the Optimizer (ADAptive Moments)
@@ -234,7 +244,9 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
             sample = train_data[i].type(torch.FloatTensor)
             target = train_targets[i].type(torch.LongTensor)
             sample = torch.reshape(sample, (sample.shape[0], 1, sample.shape[1]))
-            loss_val = loss_fn(model, loss, device, sample, target)
+            
+            loss_val = model.loss_fn(device, sample, target)
+            #loss_val = loss_fn(model, loss, device, sample, target)
             val_losses.append(loss_val.item())
             
             if loss_val < min_val_loss:

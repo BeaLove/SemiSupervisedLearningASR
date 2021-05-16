@@ -154,7 +154,7 @@ def train(dataset, num_epochs, method, batch_size=1):
     #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     if method == 'mean_teacher':
         consistency_rampup = len(unlabeled_train_loader) * 5
-        
+
         model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
                             size_hidden_layers=100, max_steps=consistency_rampup,
                             ema_decay=0.999, consistency_weight=FLAGS.consistency_weight)
@@ -166,6 +166,8 @@ def train(dataset, num_epochs, method, batch_size=1):
         raise Exception('Wrong flag for method')
 
     logging.info("Method: {}".format(method))
+    logging.info("Labeled samples: {}".format(len(labeled_train_loader)))
+    logging.info("Unlabeled samples: {}".format(len(unlabeled_train_loader)))
 
     model.to(device)
     optimizer = model.get_optimizer()
