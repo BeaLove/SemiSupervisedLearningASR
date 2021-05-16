@@ -544,7 +544,7 @@ if __name__ == '__main__':
                         'The name of loss function')
     flags.DEFINE_enum('method', 'baseline', [
                       'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
-    flags.DEFINE_float('ratio_labeled_data', 0.1, 'Ratio of unlabeled data.')
+    flags.DEFINE_float('ratio_labeled_data', 0.90, 'Ratio of unlabeled data.')
     flags.DEFINE_float('ratio_validation_data', 0.05,
                        'Ratio of validation data.')
     flags.DEFINE_float('consistency_weight', 1.0,

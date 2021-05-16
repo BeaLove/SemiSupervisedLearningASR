@@ -31,7 +31,7 @@ class MeanTeacher(nn.Module):
         self.max_steps = max_steps
         self.step = 0
 
-        self.std = 5.0
+        self.std = 1.0 #Need to check
         self.mean = 0.0
 
         self.student = LSTM(mfccs, output_phonemes, size_hidden_layers)
@@ -53,7 +53,7 @@ class MeanTeacher(nn.Module):
         return self.optimizer
 
     def consistency_criterion(self, teacher_outputs, student_outputs):
-        loss = nn.MSELoss()
+        loss = nn.MSELoss() 
         return loss(teacher_outputs, student_outputs)
 
     def criterion(self, outputs, labels):
@@ -84,7 +84,7 @@ class MeanTeacher(nn.Module):
         loss_class = self.criterion(self.forward_student(l_data), target)
 
         loss_consistency = self.consistency_criterion(
-            self.forward_student(u_data), self.forward_teacher(u_data))
+            self.forward_student(u_data), self.forward_teacher(u_data)) #Combine? u_data + l_data
 
         loss = loss_class + self.consistency_weight * \
             loss_consistency * self.linear_ramp_up()

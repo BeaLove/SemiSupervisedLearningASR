@@ -40,9 +40,6 @@ class Baseline(nn.Module):
 
     def forward(self, x):
         return torch.squeeze(self.model(x), dim=0)
-        #x = torch.nn.utils.rnn.pack_padded_sequence(x, X_lengths, batch_first=True)
-        #x = self.model(x)
-        #x, _ = torch.nn.utils.rnn.pad_packed_sequence(x, batch_first=True)
 
     def loss_fn(self, outputs, labels):
         return self.criterion(outputs, labels)
