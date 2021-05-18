@@ -1,0 +1,27 @@
+
+
+Solution 1. LULLLULLUUUULLU
+
+for epoch in epochs:
+    for batch in batches:
+
+        #batch = [LUULULLLL]
+
+        loss = 0
+        for sample in batch:
+            x, target = sample
+
+            if target != NO_LABEL:
+                loss += class_loss(x)
+            
+            loss += consistency_loss(x)
+
+        loss.backward()
+        optimizer.step()
+        ema_optimizer.step() #theta <-
+
+        #end of the current batch
+        
+    #end of the current epoch
+
+
