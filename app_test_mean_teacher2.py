@@ -264,7 +264,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
             loss_val = 0
             optimizer.zero_grad()
 
-            for batch_idx in range(i, min(val_split, i + FLAGS.batch_size)):
+            for batch_idx in range(i, min(val_split, i + FLAGS.batch_size)): #pen and papper 
 
                 sample, target = train_data[batch_idx], train_targets[batch_idx]
 
@@ -357,9 +357,9 @@ def testModel(test_data, test_targets, num_data, model):
 
     model.eval()
 
-    bar = tqdm(range(num_data))
+    #bar = tqdm(range(num_data))
 
-    for i in bar:
+    for i in range(num_data):
         sample = test_data[i]
         target = test_targets[i]
         sample = torch.reshape(sample, (sample.shape[0], 1, sample.shape[1]))
