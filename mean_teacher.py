@@ -31,7 +31,7 @@ class MeanTeacher(nn.Module):
         self.max_steps = max_steps
         self.step = 0
 
-        self.std = 1.0  # Need to check
+        self.std = 0.15  # Need to check
         self.mean = 0.0
 
         self.loss_consistency = nn.MSELoss()
@@ -68,15 +68,12 @@ class MeanTeacher(nn.Module):
 
         sample = sample.to(device)
 
-        # add noise
-        sample = sample + torch.randn(sample.size()).to(device) * self.std 
-
         if not(targets is None):
             targets = targets.to(device)
-            loss += self.loss_class(self.forward_student(sample), targets)
+            loss += self.loss_class(self.forward_student(sample)+ torch.randn(sample.size()).to(device) * self.std , targets)
 
-        loss += self.loss_consistency(self.forward_student(sample),
-                                      self.forward_teacher(sample))
+        loss += self.loss_consistency(self.forward_student(sample) + torch.randn(sample.size()).to(device) * self.std ,
+                                      self.forward_teacher(sample) + torch.randn(sample.size()).to(device) * self.std )
 
         return loss
 
