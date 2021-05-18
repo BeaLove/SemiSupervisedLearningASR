@@ -70,10 +70,11 @@ class MeanTeacher(nn.Module):
 
         if not(targets is None):
             targets = targets.to(device)
-            loss += self.loss_class(self.forward_student(sample)+ torch.randn(sample.size()).to(device) * self.std , targets)
+            loss += self.loss_class(self.forward_student(sample +
+                                    torch.randn(sample.size()).to(device) * self.std), targets)
 
-        loss += self.loss_consistency(self.forward_student(sample) + torch.randn(sample.size()).to(device) * self.std ,
-                                      self.forward_teacher(sample) + torch.randn(sample.size()).to(device) * self.std )
+        loss += self.loss_consistency(self.forward_student(sample + torch.randn(sample.size()).to(device) * self.std),
+                                      self.forward_teacher(sample + torch.randn(sample.size()).to(device) * self.std))
 
         return loss
 
