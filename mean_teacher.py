@@ -66,11 +66,13 @@ class MeanTeacher(nn.Module):
     def loss_fn(self, device, sample, targets):
         loss = 0
 
+        sample = sample.to(device)
+
         # add noise
+        sample = sample + torch.randn(sample.size()).to(device) * self.std 
 
         if not(targets is None):
-            forward = self.forward_student(sample)
-
+            targets = targets.to(device)
             loss += self.loss_class(self.forward_student(sample), targets)
 
         loss += self.loss_consistency(self.forward_student(sample),
