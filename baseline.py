@@ -41,7 +41,7 @@ class Baseline(nn.Module):
 
     def loss_fn(self, device, sample, targets):
 
-        sample = sample.to(device)
+        sample, targets = sample.to(device), targets.to(device)
 
         return self.loss(self.forward(sample), targets)
 
