@@ -20,7 +20,7 @@ class Baseline(nn.Module):
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
 	
-	def __init__(self, loss, mfccs, output_phonemes, size_hidden_layers):
+    def __init__(self, loss, mfccs, output_phonemes, size_hidden_layers):
         super(Baseline, self).__init__()
 
         self.name = 'Baseline'
@@ -41,14 +41,14 @@ class Baseline(nn.Module):
         prediction = self.model.forward(data)
         prediction = torch.squeeze(prediction, dim=1)
 
-		return self.loss(prediction, target)
+	return self.loss(prediction, target)
 		
 	
-	def train_step(self, device, u_data, l_data, target):
+    def train_step(self, device, u_data, l_data, target):
 
         self.optimizer.zero_grad()
         loss_val = self.loss_fn(device, l_data, target)
         loss_val.backward()
         self.optimizer.step()
 		
-		return loss_val
+	return loss_val
