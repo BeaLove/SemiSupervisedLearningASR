@@ -32,6 +32,8 @@ from models.lstm1 import LSTM
 from baseline import Baseline
 from mean_teacher import MeanTeacher
 
+from absl import logging
+logging.set_verbosity(logging.INFO)
 
 import copy
 FLAGS = flags.FLAGS
@@ -251,10 +253,11 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     # Configuring the Optimizer (ADAptive Moments)
     # torch.optim.Adam(model.parameters(), lr=0.001)
 
-    bar = tqdm(range(num_epochs))
-
+    logging.info("Method: {}".format(method))
+    logging.info("Labeled samples: {}".format(len(labeled_train_loader)))
+    logging.info("Unlabeled samples: {}".format(len(unlabeled_train_loader)))
     
-
+    bar = tqdm(range(num_epochs))
     for epoch in bar:
 
         # if FLAGS.method == 'mean_teacher':
