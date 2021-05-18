@@ -219,10 +219,10 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     labeled_split = val_split - math.floor(val_split * labeled_size)
 
     if torch.cuda.is_available():
-        print('using cuda')
+        logging.info("Using Cuda")
         device = torch.device('cuda:0')
     else:
-        print('using cpu')
+        logging.info("Using cpu")
         device = torch.device('cpu')
 
     # Congifuring the model
@@ -316,7 +316,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
             else:
                 epochs_no_improve += 1
             if epoch > min_epochs and epochs_no_improve == patience:
-                print("Early stopping!")
+                logging.info("Early stopping!")
                 early_stop = True
                 break
             else:
@@ -362,10 +362,10 @@ def testModel(test_data, test_targets, num_data, model):
     total = 0
 
     if torch.cuda.is_available():
-        print('using cuda')
+        logging.info("Using Cuda")
         device = torch.device('cuda:0')
     else:
-        print('using cpu')
+        logging.info("Using cpu")
         device = torch.device('cpu')
 
     model.eval()
@@ -471,7 +471,7 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad=False, oneTensor=Fals
                     0]
                 sample_targets.append(the_one_phoneme_one_hot)
             else:
-                print("Wrong mode!")
+                logging.info("Wrong mode")
                 break
 
         if(zeropad == True):
