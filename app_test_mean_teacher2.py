@@ -253,10 +253,16 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     # Configuring the Optimizer (ADAptive Moments)
     # torch.optim.Adam(model.parameters(), lr=0.001)
 
-    logging.info("Method: {}".format(method))
-    logging.info("Labeled samples: {}".format(len(labeled_train_loader)))
-    logging.info("Unlabeled samples: {}".format(len(unlabeled_train_loader)))
-    
+    logging.info("Method: {}".format(FLAGS.method))
+
+    count_labeled_samples = 0
+    for t in train_targets:
+        if not(t is None):
+            count_labeled_samples += 1
+
+    logging.info("Labeled samples: {}".format(count_labeled_samples))
+    logging.info("Unlabeled samples: {}".format(val_split))
+
     bar = tqdm(range(num_epochs))
     for epoch in bar:
 
