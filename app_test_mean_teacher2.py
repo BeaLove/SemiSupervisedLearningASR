@@ -256,12 +256,16 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     logging.info("Method: {}".format(FLAGS.method))
 
     count_labeled_samples = 0
+    count_unlabeled_samples = 0
+
     for t in train_targets:
         if not(t is None):
             count_labeled_samples += 1
+        else:
+            count_unlabeled_samples
 
     logging.info("Labeled samples: {}".format(count_labeled_samples))
-    logging.info("Unlabeled samples: {}".format(val_split))
+    logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
 
     bar = tqdm(range(num_epochs))
     for epoch in bar:
