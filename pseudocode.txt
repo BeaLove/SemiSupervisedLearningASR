@@ -2,6 +2,12 @@
 
 Solution 1. LULLLULLUUUULLU
 
+labeled = np.random.binomial(1, 0.3, 10) > 0 #[True, True, False, True, False]
+
+for t in labeled:
+    if t:
+        train_targets[i] = None
+
 for epoch in epochs:
     for batch in batches:
 
@@ -11,7 +17,7 @@ for epoch in epochs:
         for sample in batch:
             x, target = sample
 
-            if target != NO_LABEL:
+            if target is not None: 
                 loss += class_loss(x)
             
             loss += consistency_loss(x)
@@ -23,5 +29,3 @@ for epoch in epochs:
         #end of the current batch
         
     #end of the current epoch
-
-

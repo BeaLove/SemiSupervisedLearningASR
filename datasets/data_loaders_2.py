@@ -37,7 +37,7 @@ class TimitDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.audio_frame = pd.read_csv(os.path.join(root_dir, csv_file))#.head(1000)
+        self.audio_frame = pd.read_csv(os.path.join(root_dir, csv_file))#.head(550)
         self.audio_frame = self.audio_frame[self.audio_frame['is_converted_audio'] == True]
 
         self.root_dir = root_dir

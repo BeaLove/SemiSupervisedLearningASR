@@ -37,21 +37,12 @@ class Baseline(nn.Module):
         return self.optimizer
 
     def forward(self, x):
-        return self.model(x)
+        return torch.squeeze(self.model(x), dim=1)
 
-    def loss_fn(self, device, data, target):
-        data = data.to(device)
-        target = target.to(device)
-        prediction = self.model.forward(data)
-        prediction = torch.squeeze(prediction, dim=1)
+    def loss_fn(self, device, sample, targets):
+        return self.loss(self.model(sample), targets)
 
-        return self.loss(prediction, target)
-
-    def train_step(self, device, u_data, l_data, target):
-
-        self.optimizer.zero_grad()
-        loss_val = self.loss_fn(device, l_data, target)
+    def train_step(self, loss_val):
+        
         loss_val.backward()
         self.optimizer.step()
-
-        return loss_val

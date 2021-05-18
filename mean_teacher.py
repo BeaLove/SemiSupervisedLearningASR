@@ -31,14 +31,16 @@ class MeanTeacher(nn.Module):
         self.max_steps = max_steps
         self.step = 0
 
-        self.std = 1.0 #Need to check
+        self.std = 1.0  # Need to check
         self.mean = 0.0
+
+        self.loss_consistency = nn.MSELoss()
+        self.loss_class = nn.CrossEntropyLoss()
 
         self.student = LSTM(mfccs, output_phonemes, size_hidden_layers)
         self.teacher = LSTM(mfccs, output_phonemes, size_hidden_layers)
 
         self.teacher.load_state_dict(self.student.state_dict())
-
 
         self.ema_optimizer = ExponetialMovingAverage(
             model=self.student, ema_model=self.teacher, alpha=ema_decay)
@@ -52,51 +54,34 @@ class MeanTeacher(nn.Module):
     def get_optimizer(self):
         return self.optimizer
 
-    def consistency_criterion(self, teacher_outputs, student_outputs):
-        loss = nn.MSELoss() 
-        return loss(teacher_outputs, student_outputs)
-
-    def criterion(self, outputs, labels):
-        loss = nn.CrossEntropyLoss()
-        return loss(outputs, labels)
-
     def forward_student(self, x):
-        return torch.squeeze(self.student(x), dim=0)
+        return torch.squeeze(self.student(x), dim=1)
 
     def forward_teacher(self, x):
-        return torch.squeeze(self.teacher(x), dim=0)
+        return torch.squeeze(self.teacher(x), dim=1)
 
     def forward(self, x):
         return self.forward_student(x)
 
-    def loss_fn(self, outputs, labels):
-        return self.criterion(outputs, labels)
+    def loss_fn(self, device, sample, targets):
+        loss = 0
 
-    def train_step(self, device, u_data, l_data, target):
-        self.optimizer.zero_grad()
+        # add noise
 
-        u_data = u_data + \
-            torch.randn(u_data.size()).to(device) * self.std + self.mean
-        l_data = l_data + \
-            torch.randn(l_data.size()).to(device) * self.std + self.mean
+        if not(targets is None):
+            forward = self.forward_student(sample)
 
-        target = torch.squeeze(target, dim=0)
-        loss_class = self.criterion(self.forward_student(l_data), target)
+            loss += self.loss_class(self.forward_student(sample), targets)
 
-        loss_consistency = self.consistency_criterion(
-            self.forward_student(u_data), self.forward_teacher(u_data)) #Combine? u_data + l_data
-
-        loss = loss_class + self.consistency_weight * \
-            loss_consistency * self.linear_ramp_up()
-
-        loss.backward()
-
-        self.optimizer.step()
-        self.ema_optimizer.step()
-
-        self.step += 1
+        loss += self.loss_consistency(self.forward_student(sample),
+                                      self.forward_teacher(sample))
 
         return loss
+
+    def train_step(self, loss_val):
+        loss_val.backward()
+        self.optimizer.step()
+        self.ema_optimizer.step()
 
     def linear_ramp_up(self):
         return min(float(self.step) / self.max_steps, 1.0)
