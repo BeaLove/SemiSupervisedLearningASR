@@ -28,7 +28,7 @@ from datasets.data_transformations import MFCC
 from datasets.data_transformations import Phonemes
 from datasets.corpus import *
 from models.lstm1 import LSTM
-
+from torch.optim.lr_scheduler import CosineAnnealingLR
 FLAGS = flags.FLAGS
 
 def main(argv):
@@ -143,12 +143,14 @@ def trainModel(train_data, train_targets, num_data, corpus, num_epochs = 150, ba
 
     # Congifuring the model
     loss = nn.CrossEntropyLoss()
-    model = LSTM(FLAGS.num_ceps, corpus.get_phones_len(), size_hidden_layers=100)
+    model = LSTM(FLAGS.num_ceps, corpus.get_phones_len(), units_per_layer=100, num_layers=2)
     model.to(device)
     
     # Configuring the Optimizer (ADAptive Moments)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.003, betas=(0.9, 0.999), eps=1e-08, weight_decay=1e-5, amsgrad=False)
 
+    #configure LR scheduler
+    scheduler = CosineAnnealingLR(optimizer, eta_min=1e-6, T_max=462000)
     bar = tqdm(range(num_epochs))
 
     for epoch in bar:
@@ -165,6 +167,7 @@ def trainModel(train_data, train_targets, num_data, corpus, num_epochs = 150, ba
             train_losses.append(loss_val.item())
             loss_val.backward()
             optimizer.step()
+            scheduler.step()
 
         avg_train_losses.append(np.average(train_losses))
 
