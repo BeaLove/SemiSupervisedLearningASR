@@ -55,7 +55,6 @@ def main(argv):
     config = {
         "num layers" : tune.sample_from(lambda _: np.random.randint(1, 5)), #number of layers in the model
         "units" : tune.choice([25, 50, 75, 100, 150]), #number of hidden nodes in each layer
-        "lr": tune.loguniform(1e-4, 1e-1),
         "dropout": tune.sample_from(lambda _: np.random.random()*0.5),
         "weight decay": tune.loguniform(1e-5, 1e-2),
         'n_fft': 512,
@@ -196,7 +195,7 @@ def trainModel(train_data, train_targets, num_data, model, weight_decay_config, 
                                  weight_decay=weight_decay_config,
                                  amsgrad=False)
     model.to(device)
-    scheduler = CosineAnnealingLR(eta_min=1e-6, T_max=462000) #max no iterations eg num_v=batches * max_epochs
+    scheduler = CosineAnnealingLR(tunT_max=462000) #max no iterations eg num_v=batches * max_epochs
     for i in range(0, val_split):
         sample = train_data[i].type(torch.FloatTensor)
         target = train_targets[i].type(torch.LongTensor)
