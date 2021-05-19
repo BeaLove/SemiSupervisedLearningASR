@@ -35,7 +35,9 @@ def main(argv):
     """ This is our main method.
     """
     del argv  # Unused.
-    
+
+    set_seeds(0)
+
     # Initialize a Corpus object
     example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  #SA1.wav.WAV
     #dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
@@ -86,10 +88,14 @@ def main(argv):
     
     # Train model
     epochNum = FLAGS.num_epochs
-    model, avg_val_losses, avg_train_losses = trainModel(train_data, train_targets, len(train_dataset), corpus, num_epochs=epochNum)
+    model, avg_val_losses, avg_train_losses, train_accuracies, val_accuracies, test_accuracies = trainModel(train_data, train_targets, test_data, test_targets, len(train_dataset), len(test_dataset), corpus, num_epochs=epochNum)
     torch.save(model.state_dict(), save_path)
     timestamp = str(datetime.now())
-    
+
+    acc = testModel(test_data, test_targets, len(test_dataset), model)
+    plot_loss(avg_train_losses, avg_val_losses, epochNum)
+    plot_accuracy(train_accuracies, val_accuracies, test_accuracies, epochNum)
+
     # Write validation loss to disk
     with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'avg_val_losses.txt')), 'a') as valLossFile:
         valLossFile.write(timestamp)
@@ -102,8 +108,26 @@ def main(argv):
         trainLossFile.write('\n')
         trainLossFile.writelines(str(avg_train_losses))
 
-    plot_loss(avg_train_losses, avg_val_losses, epochNum)
+    # Write training accuracy to disk
+    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'train_accuracy.txt')), 'a') as val1File:
+        val1File.write(timestamp)
+        val1File.write('\n')
+        val1File.writelines(str(train_accuracies))
     
+    # Write validation accuracy to disk
+    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'validation_accuracy.txt')), 'a') as val2File:
+        val2File.write(timestamp)
+        val2File.write('\n')
+        val2File.writelines(str(val_accuracies))
+
+    # Write test accuracy to disk
+    with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'test_accuracy.txt')), 'a') as val3File:
+        val3File.write(timestamp)
+        val3File.write('\n')
+        val3File.writelines(str(test_accuracies))
+
+    print("Final test accuracy:", acc)
+
 # ------------------------------------------- ON DIRECTORY -------------------------------------------
 
 def makedirs(path):
@@ -122,17 +146,46 @@ def plot_loss(loss_train, loss_val, num_epochs):
     
     # Write loss plot to disk
     plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'loss_plot.png')))
-    
+
+def plot_accuracy(acc_train, acc_val, acc_test, num_epochs):
+    plt.clf()
+    epochs = range(1, num_epochs + 1)
+    plt.plot(epochs, acc_train, 'g', label='Training accuracy')
+    plt.plot(epochs, acc_val, 'b', label='validation accuracy')
+    plt.plot(epochs, acc_test, 'r', label='Test accuracy')
+    plt.title('Training, validation, test accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    # Write loss plot to disk
+    plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'acc_plot.png')))
+
 # ------------------------------------------- LSTM TRAINING -------------------------------------------
 
-def trainModel(train_data, train_targets, num_data, corpus, num_epochs = 150, batch_size = 1, val_size = 0.15):
+def loss_fn(model, loss, device, data, target):
+    data = data.to(device)
+    target = target.to(device)
+    prediction = model.forward(data)
+    prediction = torch.squeeze(prediction, dim=1)
+
+    return loss(prediction, target)
+
+def trainModel(train_data, train_targets, test_data, test_targets, num_data, num_test_data, corpus, num_epochs = 150, batch_size = 1, val_size = 0.05):
     train_losses = []
     val_losses = []
     avg_train_losses = []
     avg_val_losses = []
+    train_accuracies = []
+    val_accuracies = []
+    test_accuracies = []
     patience = 20
+    min_epochs = 5
+    epochs_no_improve = 0
+    early_stop = False
+    min_val_loss = np.inf
 
-    val_split = math.floor(num_data * val_size)
+    val_split = num_data - math.floor(num_data * val_size)
     
     if torch.cuda.is_available():
         print('using cuda')
@@ -142,12 +195,15 @@ def trainModel(train_data, train_targets, num_data, corpus, num_epochs = 150, ba
         device = torch.device('cpu')
 
     # Congifuring the model
-    loss = nn.CrossEntropyLoss()
-    model = LSTM(FLAGS.num_ceps, corpus.get_phones_len(), units_per_layer=100, num_layers=2)
+    if (FLAGS.loss == 'CTCLoss'):
+        loss = nn.CTCLoss()
+    else:
+        loss = nn.CrossEntropyLoss()
+    model = LSTM(FLAGS.num_ceps, corpus.get_phones_len(), size_hidden_layers=100)
     model.to(device)
     
     # Configuring the Optimizer (ADAptive Moments)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.003, betas=(0.9, 0.999), eps=1e-08, weight_decay=1e-5, amsgrad=False)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     #configure LR scheduler
     scheduler = CosineAnnealingLR(optimizer, eta_min=1e-6, T_max=462000)
@@ -162,8 +218,7 @@ def trainModel(train_data, train_targets, num_data, corpus, num_epochs = 150, ba
             sample = sample.to(device)
             target = target.to(device)
             optimizer.zero_grad()
-            prediction = model.forward(sample)
-            loss_val = loss(torch.squeeze(prediction, dim=1), target)
+            loss_val = loss_fn(model, loss, device, sample, target)
             train_losses.append(loss_val.item())
             loss_val.backward()
             optimizer.step()
@@ -176,18 +231,36 @@ def trainModel(train_data, train_targets, num_data, corpus, num_epochs = 150, ba
             sample = train_data[i].type(torch.FloatTensor)
             target = train_targets[i].type(torch.LongTensor)
             sample = torch.reshape(sample, (sample.shape[0], 1, sample.shape[1]))
-            sample = sample.to(device)
-            target = target.to(device)
-            output = model.forward(sample)
-            val_loss = loss(output.squeeze(), target.squeeze())
-            val_losses.append(val_loss.item())
+            loss_val = loss_fn(model, loss, device, sample, target)
+            val_losses.append(loss_val.item())
+
+            if loss_val < min_val_loss:
+                epochs_no_improve = 0
+                min_val_loss = loss_val
+                torch.save(model.state_dict(), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
+            else:
+                epochs_no_improve += 1
+            if epoch > min_epochs and epochs_no_improve == patience:
+                print("Early stopping!")
+                early_stop = True
+                break
+            else:
+                continue
+
         avg_val_loss = np.average(val_losses)
         avg_val_losses.append(avg_val_loss)
         model.train()
 
+        accuracy1 = testModel(train_data[0:val_split], train_targets[0:val_split], val_split, model)
+        accuracy2 = testModel(train_data[val_split:len(train_data)], train_targets[val_split:len(train_data)], (len(train_data) - val_split), model)
+        accuracy3 = testModel(test_data, test_targets, num_test_data, model)
+        train_accuracies.append(accuracy1)
+        val_accuracies.append(accuracy2)
+        test_accuracies.append(accuracy3)
+
         bar.set_description(
-            'train_loss {:.3f}; loss_loss {:.3f}'.format(
-                avg_train_losses[-1], avg_val_losses[-1])
+            'train_loss {:.3f}; val_loss {:.3f}, train_accuracy {:.3f}, val_accuracy {:.3f}, test_accuracy {:.3f}'.format(
+                avg_train_losses[-1], avg_val_losses[-1], train_accuracies[-1], val_accuracies[-1], test_accuracies[-1])
         )
 
         if epoch > 0 and epoch % 10 == 0:
@@ -204,11 +277,18 @@ def trainModel(train_data, train_targets, num_data, corpus, num_epochs = 150, ba
                 FLAGS.results_save_dir, 'checkpoints')), name)
             torch.save(checkpoint_dict, path)
 
-    return model, avg_val_losses, avg_train_losses
+    return model, avg_val_losses, avg_train_losses, train_accuracies, val_accuracies, test_accuracies
 
 def testModel(test_data, test_targets, num_data, model):
     correct = 0
     total = 0
+
+    if torch.cuda.is_available():
+        print('using cuda')
+        device = torch.device('cuda:0')
+    else:
+        print('using cpu')
+        device = torch.device('cpu')
 
     model.eval()
     
@@ -217,12 +297,17 @@ def testModel(test_data, test_targets, num_data, model):
     for i in bar:
         sample = test_data[i]
         target = test_targets[i]
-        sample = torch.nn.utils.rnn.pad_packed_sequence(sample)
-        output = model.forward(sample)
-        prediction = torch.max(output, dim=0)
-        correct += (prediction == target).float().sum()
+        sample = torch.reshape(sample, (sample.shape[0], 1, sample.shape[1]))
+        sample = sample.to(device)
+        target = target.to(device)
+        prediction = model.forward(sample)
+        prediction = torch.squeeze(prediction, dim=1)
+        _, prediction_label = torch.max(prediction, dim=1)
+        correct += (prediction_label == target).sum()
         total += target.shape[0]
     accuracy = correct / total * 100
+
+    model.train()
 
     return accuracy
     
@@ -326,6 +411,14 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad = False, oneTensor = 
 
     return tensors
 
+def set_seeds(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    return
+
 if __name__ == '__main__':
     flags.DEFINE_integer('n_fft', 512, 'Size of FFT')
     flags.DEFINE_float('preemphasis_coefficient', 0.97,
@@ -335,7 +428,7 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 60, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
     flags.DEFINE_string('dataset_root_dir', 'timit',
                         'The path to the dataset root directory')
@@ -343,5 +436,7 @@ if __name__ == '__main__':
                         'The path to the directory where all the results are saved')
     flags.DEFINE_integer('hidden', 100, 'number of nodes in each LSTM layer')
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
+    flags.DEFINE_string('loss', 'CrossEntropyLoss',
+                        'The name of loss function')
 
     app.run(main)
