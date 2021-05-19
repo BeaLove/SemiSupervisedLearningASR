@@ -48,7 +48,6 @@ def main(argv):
 
     # Initialize a Corpus object
     example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  # SA1.wav.WAV
-    #dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
     dataset_dir = 'timit'
     corpus = Corpus(dataset_dir, example_file_dir)  # TIMIT corpus
     phonemes = corpus.get_phonemes()  # List of phonemes
@@ -77,15 +76,34 @@ def main(argv):
                                                        num_ceps=FLAGS.num_ceps,
                                                        corpus=corpus))
 
-    # Get the MFCC coefficients
-    train_data, max_len = getMFCCFeatures(train_dataset, oneTensor=False)
-    test_data, max_len_test = getMFCCFeatures(test_dataset, oneTensor=False)
+    if (FLAGS.source == 'dataloader'):
+        # Get the MFCC coefficients
+        train_data, max_len = getMFCCFeatures(train_dataset, oneTensor=False)
+        test_data, max_len_test = getMFCCFeatures(test_dataset, oneTensor=False)
 
-    # Get the phonemes per frame (as percentages)
-    train_targets = getTargetPhonemes(
-        train_dataset, max_len, corpus, oneTensor=False, mode="indices")
-    test_targets = getTargetPhonemes(
-        test_dataset, max_len, corpus, oneTensor=False, mode="indices")
+        # Get the phonemes per frame
+        train_targets = getTargetPhonemes(
+            train_dataset, max_len, corpus, oneTensor=False, mode="indices")
+        test_targets = getTargetPhonemes(
+            test_dataset, max_len, corpus, oneTensor=False, mode="indices")
+
+        writedirs(train_data, "train_data.pt")
+        writedirs(test_data, "test_data.pt")
+        writedirs(train_targets, "train_targets.pt")
+        writedirs(test_targets, "test_targets.pt")
+        writeelem(max_len, "max_len.pt")
+        writeelem(max_len_test, "max_len_test.pt")
+        
+    elif (FLAGS.source == 'files'):
+        # Get the MFCC coefficients
+        train_data = readdirs("train_data.pt", len(train_dataset))
+        max_len = readelem("max_len.pt")
+        test_data = readdirs("test_data.pt", len(test_dataset))
+        max_len_test = readelem("max_len_test.pt")
+
+        # Get the phonemes per frame
+        train_targets = readdirs("train_targets.pt", len(train_dataset))
+        test_targets = readdirs("test_targets.pt", len(test_dataset))
 
     # Create directories
     makedirs(FLAGS.results_save_dir)
@@ -144,6 +162,29 @@ def main(argv):
 
 def makedirs(path):
     Path(path).mkdir(parents=False, exist_ok=True)
+
+def writedirs(mylist, filename):
+    for i in range(0, len(mylist)):
+      torch.save(mylist[i], ("tensors/" + str(i) + filename))
+
+def readdirs(filename, lim):
+    newlist = []
+    for i in range(0, lim):
+        decomc = torch.load(("tensors/" + str(i) + filename))
+        newlist.append(decomc)
+
+    return newlist
+
+def writeelem(element, filename):
+    ten = torch.from_numpy(np.array([element]))
+
+    torch.save(ten, filename)
+
+def readelem(filename):
+
+    decomc = torch.load(filename)
+    num = decomc.numpy()[0]
+    return num
 
 # ------------------------------------------- LOSS PLOTTING -------------------------------------------
 
@@ -236,7 +277,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         consistency_rampup = len(train_data) * 5
 
         model = MeanTeacher(FLAGS.num_ceps, corpus.get_phones_len(),
-                            size_hidden_layers=100, max_steps=consistency_rampup,
+                            size_hidden_layers=FLAGS.num_hidden, max_steps=consistency_rampup,
                             ema_decay=0.999, consistency_weight=FLAGS.consistency_weight)
 
         train_targets[0:val_split] = get_targets(train_targets[0:val_split], p = FLAGS.labeled_p)
@@ -267,8 +308,6 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
     bar = tqdm(range(num_epochs))
     for epoch in bar:
-
-        # if FLAGS.method == 'mean_teacher':
 
         for i in range(0, val_split, FLAGS.batch_size):
 
@@ -531,5 +570,7 @@ if __name__ == '__main__':
     flags.DEFINE_enum('optimizer', 'AdamNormGrad', [
                       'Adam', 'AdamNormGrad'], 'The optimizer: Adam, AdamNormGrad (Adam with normalizing gradients)')
     flags.DEFINE_integer('num_hidden', 100, 'Size of hidden layer.')
+    flags.DEFINE_enum('source', 'dataloader', [
+                      'dataloader', 'files'], 'The data loading source: data loader, hard disk.')
 
     app.run(main)
