@@ -28,8 +28,16 @@ from datasets.data_transformations import MFCC
 from datasets.data_transformations import Phonemes
 from datasets.corpus import *
 from models.lstm1 import LSTM
-from torch.optim.lr_scheduler import CosineAnnealingLR
+
+from baseline import Baseline
+from mean_teacher import MeanTeacher
+
+from absl import logging
+logging.set_verbosity(logging.INFO)
+
+import copy
 FLAGS = flags.FLAGS
+
 
 def main(argv):
     """ This is our main method.
@@ -39,44 +47,64 @@ def main(argv):
     set_seeds(0)
 
     # Initialize a Corpus object
-    example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  #SA1.wav.WAV
-    #dataset_dir = "/home/georgmosh/Documents/SpeechLabs/dt2119_semisup_project/SemiSupervisedLearningASR-main/timit"
+    example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  # SA1.wav.WAV
     dataset_dir = 'timit'
-    corpus = Corpus(dataset_dir, example_file_dir) # TIMIT corpus
+    corpus = Corpus(dataset_dir, example_file_dir)  # TIMIT corpus
     phonemes = corpus.get_phonemes()  # List of phonemes
     targets = len(phonemes)  # Number of categories
 
     # Load the TIMIT dataset
-    train_dataset = TimitDataset(csv_file = 'train_data.csv',
-                           root_dir = dataset_dir,
-                           corpus = corpus,
-                           transform = MFCC(n_fft=FLAGS.n_fft,
-                                          preemphasis_coefficient=FLAGS.preemphasis_coefficient,
-                                          num_ceps=FLAGS.num_ceps),
-                           transcription = Phonemes(n_fft=FLAGS.n_fft,
-                                           preemphasis_coefficient=FLAGS.preemphasis_coefficient,
-                                           num_ceps=FLAGS.num_ceps,
-                                           corpus = corpus))
-    
-    test_dataset = TimitDataset(csv_file = 'test_data.csv',
-                           root_dir = dataset_dir,
-                           corpus = corpus,
-                           transform = MFCC(n_fft=FLAGS.n_fft,
-                                          preemphasis_coefficient=FLAGS.preemphasis_coefficient,
-                                          num_ceps=FLAGS.num_ceps),
-                           transcription = Phonemes(n_fft=FLAGS.n_fft,
-                                           preemphasis_coefficient=FLAGS.preemphasis_coefficient,
-                                           num_ceps=FLAGS.num_ceps,
-                                           corpus = corpus))
+    train_dataset = TimitDataset(csv_file='train_data.csv',
+                                 root_dir=dataset_dir,
+                                 corpus=corpus,
+                                 transform=MFCC(n_fft=FLAGS.n_fft,
+                                                preemphasis_coefficient=FLAGS.preemphasis_coefficient,
+                                                num_ceps=FLAGS.num_ceps),
+                                 transcription=Phonemes(n_fft=FLAGS.n_fft,
+                                                        preemphasis_coefficient=FLAGS.preemphasis_coefficient,
+                                                        num_ceps=FLAGS.num_ceps,
+                                                        corpus=corpus))
 
-    # Get the MFCC coefficients
-    train_data, max_len = getMFCCFeatures(train_dataset, oneTensor = False)
-    test_data, max_len_test = getMFCCFeatures(test_dataset, oneTensor = False)
-    
-    # Get the phonemes per frame (as percentages)
-    train_targets = getTargetPhonemes(train_dataset, max_len, corpus, oneTensor = False, mode = "indices")
-    test_targets = getTargetPhonemes(test_dataset, max_len, corpus, oneTensor = False, mode = "indices")
-    
+    test_dataset = TimitDataset(csv_file='test_data.csv',
+                                root_dir=dataset_dir,
+                                corpus=corpus,
+                                transform=MFCC(n_fft=FLAGS.n_fft,
+                                               preemphasis_coefficient=FLAGS.preemphasis_coefficient,
+                                               num_ceps=FLAGS.num_ceps),
+                                transcription=Phonemes(n_fft=FLAGS.n_fft,
+                                                       preemphasis_coefficient=FLAGS.preemphasis_coefficient,
+                                                       num_ceps=FLAGS.num_ceps,
+                                                       corpus=corpus))
+
+    if (FLAGS.source == 'dataloader'):
+        # Get the MFCC coefficients
+        train_data, max_len = getMFCCFeatures(train_dataset, oneTensor=False)
+        test_data, max_len_test = getMFCCFeatures(test_dataset, oneTensor=False)
+
+        # Get the phonemes per frame
+        train_targets = getTargetPhonemes(
+            train_dataset, max_len, corpus, oneTensor=False, mode="indices")
+        test_targets = getTargetPhonemes(
+            test_dataset, max_len, corpus, oneTensor=False, mode="indices")
+
+        writedirs(train_data, "train_data.pt")
+        writedirs(test_data, "test_data.pt")
+        writedirs(train_targets, "train_targets.pt")
+        writedirs(test_targets, "test_targets.pt")
+        writeelem(max_len, "max_len.pt")
+        writeelem(max_len_test, "max_len_test.pt")
+        
+    elif (FLAGS.source == 'files'):
+        # Get the MFCC coefficients
+        train_data = readdirs("train_data.pt", len(train_dataset))
+        max_len = readelem("max_len.pt")
+        test_data = readdirs("test_data.pt", len(test_dataset))
+        max_len_test = readelem("max_len_test.pt")
+
+        # Get the phonemes per frame
+        train_targets = readdirs("train_targets.pt", len(train_dataset))
+        test_targets = readdirs("test_targets.pt", len(test_dataset))
+
     # Create directories
     makedirs(FLAGS.results_save_dir)
     makedirs(os.path.join(FLAGS.results_save_dir, 'checkpoints'))
@@ -85,10 +113,11 @@ def main(argv):
     model_name = FLAGS.name
     save_folder = os.path.abspath(FLAGS.results_save_dir)
     save_path = os.path.join(save_folder, model_name)
-    
+
     # Train model
     epochNum = FLAGS.num_epochs
-    model, avg_val_losses, avg_train_losses, train_accuracies, val_accuracies, test_accuracies = trainModel(train_data, train_targets, test_data, test_targets, len(train_dataset), len(test_dataset), corpus, num_epochs=epochNum)
+    model, avg_val_losses, avg_train_losses, train_accuracies, val_accuracies, test_accuracies = trainModel(
+        train_data, train_targets, test_data, test_targets, len(train_dataset), len(test_dataset), corpus, num_epochs=epochNum)
     torch.save(model.state_dict(), save_path)
     timestamp = str(datetime.now())
 
@@ -113,7 +142,7 @@ def main(argv):
         val1File.write(timestamp)
         val1File.write('\n')
         val1File.writelines(str(train_accuracies))
-    
+
     # Write validation accuracy to disk
     with open(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'validation_accuracy.txt')), 'a') as val2File:
         val2File.write(timestamp)
@@ -130,10 +159,35 @@ def main(argv):
 
 # ------------------------------------------- ON DIRECTORY -------------------------------------------
 
+
 def makedirs(path):
     Path(path).mkdir(parents=False, exist_ok=True)
 
+def writedirs(mylist, filename):
+    for i in range(0, len(mylist)):
+      torch.save(mylist[i], ("tensors/" + str(i) + filename))
+
+def readdirs(filename, lim):
+    newlist = []
+    for i in range(0, lim):
+        decomc = torch.load(("tensors/" + str(i) + filename))
+        newlist.append(decomc)
+
+    return newlist
+
+def writeelem(element, filename):
+    ten = torch.from_numpy(np.array([element]))
+
+    torch.save(ten, filename)
+
+def readelem(filename):
+
+    decomc = torch.load(filename)
+    num = decomc.numpy()[0]
+    return num
+
 # ------------------------------------------- LOSS PLOTTING -------------------------------------------
+
 
 def plot_loss(loss_train, loss_val, num_epochs):
     epochs = range(1, num_epochs + 1)
@@ -143,9 +197,11 @@ def plot_loss(loss_train, loss_val, num_epochs):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    
+
     # Write loss plot to disk
-    plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'loss_plot.png')))
+    plt.savefig(os.path.abspath(os.path.join(
+        FLAGS.results_save_dir, 'loss_plot.png')))
+
 
 def plot_accuracy(acc_train, acc_val, acc_test, num_epochs):
     plt.clf()
@@ -159,9 +215,11 @@ def plot_accuracy(acc_train, acc_val, acc_test, num_epochs):
     plt.legend()
 
     # Write loss plot to disk
-    plt.savefig(os.path.abspath(os.path.join(FLAGS.results_save_dir, 'acc_plot.png')))
+    plt.savefig(os.path.abspath(os.path.join(
+        FLAGS.results_save_dir, 'acc_plot.png')))
 
 # ------------------------------------------- LSTM TRAINING -------------------------------------------
+
 
 def loss_fn(model, loss, device, data, target):
     data = data.to(device)
@@ -171,7 +229,18 @@ def loss_fn(model, loss, device, data, target):
 
     return loss(prediction, target)
 
-def trainModel(train_data, train_targets, test_data, test_targets, num_data, num_test_data, corpus, num_epochs = 150, batch_size = 1, val_size = 0.05):
+
+def get_targets(targets, p):
+    labeled = np.random.binomial(1, p, len(targets)) > 0
+
+    for i, trail in enumerate(labeled):
+        if trail == False:
+            targets[i] = None
+
+    return targets
+
+
+def trainModel(train_data, train_targets, test_data, test_targets, num_data, num_test_data, corpus, num_epochs=150, batch_size=1, val_size=0.05, labeled_size=0.1):
     train_losses = []
     val_losses = []
     avg_train_losses = []
@@ -185,13 +254,16 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     early_stop = False
     min_val_loss = np.inf
 
+    full_train_targets = copy.deepcopy(train_targets)
+
     val_split = num_data - math.floor(num_data * val_size)
-    
+    labeled_split = val_split - math.floor(val_split * labeled_size)
+
     if torch.cuda.is_available():
-        print('using cuda')
+        logging.info("Using Cuda")
         device = torch.device('cuda:0')
     else:
-        print('using cpu')
+        logging.info("Using cpu")
         device = torch.device('cpu')
 
     # Congifuring the model
@@ -199,30 +271,66 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         loss = nn.CTCLoss()
     else:
         loss = nn.CrossEntropyLoss()
-    model = LSTM(FLAGS.num_ceps, corpus.get_phones_len(), size_hidden_layers=100)
+
+    if FLAGS.method == 'mean_teacher':
+        # need to check this. add flag
+        consistency_rampup = len(train_data) * 5
+
+        model = MeanTeacher(FLAGS.num_ceps, corpus.get_phones_len(),
+                            size_hidden_layers=FLAGS.num_hidden, max_steps=consistency_rampup,
+                            ema_decay=0.999, consistency_weight=FLAGS.consistency_weight)
+
+        train_targets[0:val_split] = get_targets(train_targets[0:val_split], p = FLAGS.labeled_p)
+
+    elif FLAGS.method == 'baseline':
+        model = Baseline(loss, mfccs=FLAGS.num_ceps,
+                         output_phonemes=corpus.get_phones_len(), size_hidden_layers=FLAGS.num_hidden,
+                         optimizer=FLAGS.optimizer)
+    else:
+        raise Exception('Wrong flag for method')
     model.to(device)
-    
-    # Configuring the Optimizer (ADAptive Moments)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    #configure LR scheduler
-    scheduler = CosineAnnealingLR(optimizer, eta_min=1e-6, T_max=462000)
+    optimizer = model.get_optimizer()
+
+    logging.info("Method: {}".format(FLAGS.method))
+
+    count_labeled_samples = 0
+    count_unlabeled_samples = 0
+
+    for t in train_targets:
+        if not(t is None):
+            count_labeled_samples += 1
+        else:
+            count_unlabeled_samples
+
+    logging.info("Labeled samples: {}".format(count_labeled_samples))
+    logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
+
     bar = tqdm(range(num_epochs))
-
     for epoch in bar:
 
-        for i in range(0, val_split):
-            sample = train_data[i].type(torch.FloatTensor)
-            target = train_targets[i].type(torch.LongTensor)
-            sample = torch.reshape(sample, (sample.shape[0], 1, sample.shape[1]))
-            sample = sample.to(device)
-            target = target.to(device)
+        for i in range(0, val_split, FLAGS.batch_size):
+
+            loss_val = 0
             optimizer.zero_grad()
-            loss_val = loss_fn(model, loss, device, sample, target)
+
+            for batch_idx in range(i, min(val_split, i + FLAGS.batch_size)): #pen and papper 
+
+                sample, target = train_data[batch_idx], train_targets[batch_idx]
+
+                sample = sample.type(torch.FloatTensor)
+                sample = torch.reshape(
+                    sample, (sample.shape[0], 1, sample.shape[1]))
+
+                if not(target is None):
+                    target = target.type(torch.LongTensor)
+
+                result = model.loss_fn(device, sample, target)
+                loss_val += result
+
+            model.train_step(loss_val)
+
             train_losses.append(loss_val.item())
-            loss_val.backward()
-            optimizer.step()
-            scheduler.step()
 
         avg_train_losses.append(np.average(train_losses))
 
@@ -230,18 +338,22 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         for i in range(val_split, num_data):
             sample = train_data[i].type(torch.FloatTensor)
             target = train_targets[i].type(torch.LongTensor)
-            sample = torch.reshape(sample, (sample.shape[0], 1, sample.shape[1]))
-            loss_val = loss_fn(model, loss, device, sample, target)
+            sample = torch.reshape(
+                sample, (sample.shape[0], 1, sample.shape[1]))
+
+            loss_val = model.loss_fn(device, sample, target)
+            #loss_val = loss_fn(model, loss, device, sample, target)
             val_losses.append(loss_val.item())
 
             if loss_val < min_val_loss:
                 epochs_no_improve = 0
                 min_val_loss = loss_val
-                torch.save(model.state_dict(), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
+                torch.save(model.state_dict(
+                ), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
             else:
                 epochs_no_improve += 1
             if epoch > min_epochs and epochs_no_improve == patience:
-                print("Early stopping!")
+                logging.info("Early stopping!")
                 early_stop = True
                 break
             else:
@@ -251,8 +363,10 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         avg_val_losses.append(avg_val_loss)
         model.train()
 
-        accuracy1 = testModel(train_data[0:val_split], train_targets[0:val_split], val_split, model)
-        accuracy2 = testModel(train_data[val_split:len(train_data)], train_targets[val_split:len(train_data)], (len(train_data) - val_split), model)
+        accuracy1 = testModel(
+            train_data[0:val_split], full_train_targets[0:val_split], val_split, model)
+        accuracy2 = testModel(train_data[val_split:len(train_data)], full_train_targets[val_split:len(
+            train_data)], (len(train_data) - val_split), model)
         accuracy3 = testModel(test_data, test_targets, num_test_data, model)
         train_accuracies.append(accuracy1)
         val_accuracies.append(accuracy2)
@@ -279,22 +393,23 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
     return model, avg_val_losses, avg_train_losses, train_accuracies, val_accuracies, test_accuracies
 
+
 def testModel(test_data, test_targets, num_data, model):
     correct = 0
     total = 0
 
     if torch.cuda.is_available():
-        print('using cuda')
+        logging.info("Using Cuda")
         device = torch.device('cuda:0')
     else:
-        print('using cpu')
+        logging.info("Using cpu")
         device = torch.device('cpu')
 
     model.eval()
-    
-    bar = tqdm(range(num_data))
 
-    for i in bar:
+    #bar = tqdm(range(num_data))
+
+    for i in range(num_data):
         sample = test_data[i]
         target = test_targets[i]
         sample = torch.reshape(sample, (sample.shape[0], 1, sample.shape[1]))
@@ -310,10 +425,11 @@ def testModel(test_data, test_targets, num_data, model):
     model.train()
 
     return accuracy
-    
+
 # ------------------------------------------- DATA LOADING -------------------------------------------
 
-def getMFCCFeatures(dataset, zeropad = False, oneTensor = False):
+
+def getMFCCFeatures(dataset, zeropad=False, oneTensor=False):
     """ This method computes the MFCC coefficients per frame.
          When frames are less than the maximum amount does zero-padding.
          @returns tensors of MFCC coefficients of the same length
@@ -323,31 +439,32 @@ def getMFCCFeatures(dataset, zeropad = False, oneTensor = False):
     max_frames = -1
 
     for i in range(len(dataset)):
-            sample = dataset[i]
-            audio = np.asarray(sample['audio'])
-            if(max_frames < audio.shape[0]):
-                max_frames = audio.shape[0]
-            if(zeropad == True):
-                features.append(audio)
-            else:
-                tensors.append(torch.tensor(audio.tolist(), dtype=torch.float))
-    
+        sample = dataset[i]
+        audio = np.asarray(sample['audio'])
+        if(max_frames < audio.shape[0]):
+            max_frames = audio.shape[0]
+        if(zeropad == True):
+            features.append(audio)
+        else:
+            tensors.append(torch.tensor(audio.tolist(), dtype=torch.float))
+
     if(zeropad == True):
         # zero-padding for equal length
         for i in range(len(dataset)):
             audio_new = np.zeros((max_frames, features[i].shape[1]))
-            audio_new[0:features[i].shape[0],:] = features[i]
+            audio_new[0:features[i].shape[0], :] = features[i]
             tensors.append(torch.tensor(audio_new.tolist(), dtype=torch.float))
-    
+
     if(oneTensor == True):
         whole = tensors[0].numpy()
         for i in range(1, len(dataset)):
-            whole = np.concatenate((whole, tensors[i].numpy()), axis = 0)
-        tensors = torch.tensor(whole.tolist(), dtype = torch.float)
+            whole = np.concatenate((whole, tensors[i].numpy()), axis=0)
+        tensors = torch.tensor(whole.tolist(), dtype=torch.float)
 
     return tensors, max_frames
 
-def getTargetPhonemes(dataset, max_frames, corpus, zeropad = False, oneTensor = False, mode = "indices"):
+
+def getTargetPhonemes(dataset, max_frames, corpus, zeropad=False, oneTensor=False, mode="indices"):
     """ This method computes the target phonemes as percentages per frame.
          @returns tensors of phonemes per frame
     """
@@ -358,7 +475,7 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad = False, oneTensor = 
         sample = dataset[i]
         phoneme_list = sample['phonemes_per_frame']
         sample_targets = []
-        
+
         for j in range(len(phoneme_list)):
             if(mode == "indices"):
                 # using only one phoneme explicitly imposed --> first phoneme index
@@ -369,14 +486,17 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad = False, oneTensor = 
                 if(len(phoneme_list[j]) == 1):
                     # only one phoneme in this frame --> one hot encoding
                     the_one_phoneme = phoneme_list[j][0][2]
-                    the_one_phoneme_one_hot = corpus.phones_to_onehot([the_one_phoneme])[0]
+                    the_one_phoneme_one_hot = corpus.phones_to_onehot([the_one_phoneme])[
+                        0]
                     sample_targets.append(the_one_phoneme_one_hot)
                 else:
                     # more than one phonemes in this frame --> probabilities
-                    complex_one_hot = np.zeros(corpus.get_phones_len()).tolist()
+                    complex_one_hot = np.zeros(
+                        corpus.get_phones_len()).tolist()
                     for k in range(len(phoneme_list[j])):
                         the_kth_phoneme = phoneme_list[j][k][2]
-                        the_kth_phoneme_ID = corpus.get_phones_ID(the_kth_phoneme)
+                        the_kth_phoneme_ID = corpus.get_phones_ID(
+                            the_kth_phoneme)
                         the_kth_phoneme_percentage = phoneme_list[j][k][3]
                         complex_one_hot[the_kth_phoneme_ID] = the_kth_phoneme_percentage
                     sample_targets.append(complex_one_hot)
@@ -384,12 +504,13 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad = False, oneTensor = 
                 # using only one phoneme explicitly imposed --> one hot encoding
                 the_one_phoneme = phoneme_list[j][0][2]
                 the_one_phoneme_id = corpus.get_phones_ID(the_one_phoneme)
-                the_one_phoneme_one_hot = corpus.phones_to_onehot([the_one_phoneme])[0]
+                the_one_phoneme_one_hot = corpus.phones_to_onehot([the_one_phoneme])[
+                    0]
                 sample_targets.append(the_one_phoneme_one_hot)
             else:
-                print("Wrong mode!")
+                logging.info("Wrong mode")
                 break
-        
+
         if(zeropad == True):
             for j in range(len(phoneme_list), max_frames):
                 # adding a silence target for the extra frames (zero-padded additions)
@@ -400,16 +521,17 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad = False, oneTensor = 
                 elif(mode == "indices"):
                     silence_id = corpus.get_phones_ID(silence)
                     sample_targets.append(silence_id)
-                
+
         tensors.append(torch.tensor(sample_targets, dtype=torch.long))
-        
+
     if(oneTensor == True):
         whole = tensors[0].numpy()
         for i in range(1, len(dataset)):
-            whole = np.concatenate((whole, tensors[i].numpy()), axis = 0)
-        tensors = torch.tensor(whole.tolist(), dtype = torch.long)
+            whole = np.concatenate((whole, tensors[i].numpy()), axis=0)
+        tensors = torch.tensor(whole.tolist(), dtype=torch.long)
 
     return tensors
+
 
 def set_seeds(seed):
     torch.manual_seed(seed)
@@ -418,6 +540,7 @@ def set_seeds(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     return
+
 
 if __name__ == '__main__':
     flags.DEFINE_integer('n_fft', 512, 'Size of FFT')
@@ -428,7 +551,7 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 60, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
     flags.DEFINE_string('dataset_root_dir', 'timit',
                         'The path to the dataset root directory')
@@ -438,5 +561,16 @@ if __name__ == '__main__':
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
     flags.DEFINE_string('loss', 'CrossEntropyLoss',
                         'The name of loss function')
+    flags.DEFINE_float('labeled_p', 0.1, 'Labeled percentage of data')
+    flags.DEFINE_integer('batch_size', 1, 'The batch size')
+    flags.DEFINE_enum('method', 'baseline', [
+                      'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
+    flags.DEFINE_float('consistency_weight', 1.0,
+                       'The consistency weight for the mean teacher loss.')
+    flags.DEFINE_enum('optimizer', 'AdamNormGrad', [
+                      'Adam', 'AdamNormGrad'], 'The optimizer: Adam, AdamNormGrad (Adam with normalizing gradients)')
+    flags.DEFINE_integer('num_hidden', 100, 'Size of hidden layer.')
+    flags.DEFINE_enum('source', 'dataloader', [
+                      'dataloader', 'files'], 'The data loading source: data loader, hard disk.')
 
     app.run(main)

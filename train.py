@@ -9,6 +9,7 @@ from test import test_model
 from pathlib import Path
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from ray import tune
 
 from models.lstm import LSTMModel
 from models.lstm1 import LSTM
@@ -53,8 +54,14 @@ def main(args):
     '''important before training a model set model name so checkpoints 
     and fully trained model gets saved with correct name'''
 
+    model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100, num_layers=5)
+
     model, avg_val_losses, avg_train_losses = train(
+<<<<<<< HEAD
         dataset, method=FLAGS.method, num_epochs=FLAGS.num_epochs)
+=======
+        dataset, model, num_epochs=FLAGS.num_epochs)
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
 
     torch.save(model.state_dict(), save_path)
 
@@ -104,17 +111,24 @@ def loss_fn(model, loss, device, data, target):
     return loss(prediction_2, target_2)
 
 
+<<<<<<< HEAD
 def train(dataset, num_epochs, method, batch_size=1):
+=======
+def train(dataset, model, num_epochs, batch_size=1, tuning=False):
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
     train_losses = []
-    val_losses = []
     avg_train_losses = []
     avg_val_losses = []
     accuracies = []
+<<<<<<< HEAD
     patience = 20
+=======
+    patience = 15
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
     min_epochs = 5
     epochs_no_improve = 0
     early_stop = False
-    min_val_loss = np.inf
+    min_val_loss = torch.tensor(10000)
 
     val_split = int(len(dataset)*FLAGS.ratio_validation_data)
     train_data, val_data = torch.utils.data.random_split(dataset, [len(dataset) - val_split, val_split],
@@ -146,11 +160,12 @@ def train(dataset, num_epochs, method, batch_size=1):
     if (FLAGS.loss == 'CrossEntropyLoss'):
         loss = nn.CrossEntropyLoss()
     else:
-        loss = nn.CrossEntropyLoss()
+        loss = nn.CTCLoss()
 
     # model = LSTMModel(input_dim=13, hidden_dim=500,
     #                  layer_dim=1, output_dim=dataset.num_labels)
 
+<<<<<<< HEAD
     #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
     if method == 'mean_teacher':
         consistency_rampup = len(unlabeled_train_loader) * 5
@@ -169,12 +184,20 @@ def train(dataset, num_epochs, method, batch_size=1):
     logging.info("Labeled samples: {}".format(len(labeled_train_loader)))
     logging.info("Unlabeled samples: {}".format(len(unlabeled_train_loader)))
 
+=======
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
     model.to(device)
     optimizer = model.get_optimizer()
 
+<<<<<<< HEAD
     # optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
     #    0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     #early_stop = EarlyStopping(patience=patience, verbose=True)
+=======
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
+        0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
 
     bar = tqdm(range(num_epochs))
 
@@ -201,6 +224,7 @@ def train(dataset, num_epochs, method, batch_size=1):
 
         avg_train_losses.append(np.average(train_losses))
 
+<<<<<<< HEAD
         model.eval()
         for data, target in val_loader:
             data, target = data.to(device), target.to(device)
@@ -236,16 +260,39 @@ def train(dataset, num_epochs, method, batch_size=1):
 
         accuracy = validate(val_loader, model, device)
 
+=======
+        accuracy, loss_value = validate(val_loader, model, loss, device)
+        avg_val_losses.append(loss_value)
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
         accuracies.append(accuracy)
+        if loss_value < min_val_loss:
+            print("HERE")
+            epochs_no_improve = 0
+            min_val_loss = loss_value
+            #                 print("NONE IMPROVEMENT")
+            torch.save(model.state_dict(),
+                       '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
+        else:
+            print('in else')
+            epochs_no_improve += 1
+        #                 print("IMPROVE epochs ")
+        if epoch > min_epochs and epochs_no_improve == patience:
 
-        model.train()
+            print("Early stopping!")
+            early_stop = True
+            break
 
         bar.set_description(
             'train_loss {:.3f}; val_loss {:.3f}, val_accuracy {:.3f}'.format(
                 avg_train_losses[-1], avg_val_losses[-1], accuracies[-1])
         )
+        if tuning:
+            with tune.checkpoint_dir(epoch) as checkpoint_dir:
+                path = os.path.join(checkpoint_dir, "checkpoint")
+                torch.save((model.state_dict(), optimizer.state_dict()), path)
+            tune.report(loss=loss_value, accuracy=accuracy)
 
-        if epoch > 0 and epoch % 10 == 0:
+        if not tuning and epoch > 0 and epoch % 10 == 0:
             checkpoint_dict = {
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -259,36 +306,45 @@ def train(dataset, num_epochs, method, batch_size=1):
                 FLAGS.results_save_dir, 'checkpoints')), name)
             torch.save(checkpoint_dict, path)
 
-            '''early_stop(avg_val_loss, model)
-            if early_stop.early_stop:
-                print("Early stopping")
-                model.load_state_dict(torch.load('checkpoint.pt'))
-                break'''
         if early_stop:
             print("Early stopped after {} epochs".format(epoch))
             break
+
     return model, avg_val_losses, avg_train_losses
 
 
-def validate(val_loader, model, device):
+def validate(val_loader, model, loss, device):
     correct = 0
     total = 0
     model.eval()
+<<<<<<< HEAD
     for point in val_loader:
+=======
+    val_losses = []
+
+    for point in tqdm(val_loader):
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
         sample, target = point
         sample = sample.to(device)
         target = target.to(device)
 
         output = model.forward(sample)
+<<<<<<< HEAD
+=======
+        val_losses.append(loss(torch.squeeze(output), torch.squeeze(target)))
+
+        output = torch.squeeze(output, dim=0)
+
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
         _, prediction = torch.max(output, dim=1)
 
         correct += (prediction == target).sum()
         total += target.shape[1]
+    avg_val_loss = np.average(val_losses)
     accuracy = correct / total * 100
+    model.train()
+    return accuracy, avg_val_loss
 
-    return accuracy
-
-    # batch.set_postfix(loss.item())
 
 
 if __name__ == '__main__':

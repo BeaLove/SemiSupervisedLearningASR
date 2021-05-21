@@ -85,3 +85,11 @@ class MeanTeacher(nn.Module):
 
     def linear_ramp_up(self):
         return min(float(self.step) / self.max_steps, 1.0)
+
+    def sigmoid_rampup(current, rampup_length):
+        if rampup_length == 0:
+            return 1.0
+        else:
+            current = np.clip(current, 0.0, rampup_length)
+            phase = 1.0 - current / rampup_length
+            return float(np.exp(-5.0 * phase * phase))
