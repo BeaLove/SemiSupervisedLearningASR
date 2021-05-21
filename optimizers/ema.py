@@ -1,6 +1,5 @@
 import torch
 
-
 class ExponetialMovingAverage(object):
     def __init__(self, model, ema_model, alpha=0.999):
         self.model = model
@@ -12,8 +11,4 @@ class ExponetialMovingAverage(object):
         for param, ema_param in zip(self.model.parameters(), self.ema_model.parameters()):
             ema_param.data.mul_(self.alpha).add_((1 - self.alpha) * param)
 
-<<<<<<< HEAD
             #w = w * 0.99 + 0.01 * new_w
-=======
-            #w = w * 0.99 + 0.01 * new_w
->>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
