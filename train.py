@@ -47,12 +47,13 @@ def main(argv):
     set_seeds(0)
 
     logging.info("Method: {}".format(FLAGS.method))
-    logging.info("Epochs: {}".format(FLAGS.num_epochs))
-    logging.info("Batch size: {}".format(FLAGS.batch_size))
-    logging.info("Number of nodes: {}".format(FLAGS.num_hidden))
-    logging.info("Number of layers: {}".format(FLAGS.num_layers))
-    logging.info("Dropout: {}".format(FLAGS.dropout))
-    logging.info("Optimizer: {}".format(FLAGS.optimizer))
+    logging.info("num_epochs: {}".format(FLAGS.num_epochs))
+    logging.info("batch_size: {}".format(FLAGS.batch_size))
+    logging.info("num_hidden: {}".format(FLAGS.num_hidden))
+    logging.info("num_layers: {}".format(FLAGS.num_layers))
+    logging.info("dropout: {}".format(FLAGS.dropout))
+    logging.info("optimizer: {}".format(FLAGS.optimizer))
+    logging.info("lr: {}".format(FLAGS.lr))
 
     # Initialize a Corpus object
     example_file_dir = "/data/TRAIN/DR1/FCJF0/SA1"  # SA1.wav.WAV
@@ -295,26 +296,26 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         consistency_rampup = len(train_data) * 5
 
         model = MeanTeacher(mfccs=FLAGS.num_ceps, output_phonemes=corpus.get_phones_len(),
-                         units_per_layer=FLAGS.num_hidden, num_layers=FLAGS.num_layers,
-                         dropout=FLAGS.dropout, optimizer=FLAGS.optimizer, lr=FLAGS.lr,
-                         max_steps=10000, ema_decay=0.999, consistency_weight=1.0)
+                            units_per_layer=FLAGS.num_hidden, num_layers=FLAGS.num_layers,
+                            dropout=FLAGS.dropout, optimizer=FLAGS.optimizer, lr=FLAGS.lr,
+                            max_steps=10000, ema_decay=0.999, consistency_weight=1.0)
 
-        train_targets[0:val_split]=get_targets(
-            train_targets[0:val_split], p = FLAGS.labeled_p)
+        train_targets[0:val_split] = get_targets(
+            train_targets[0:val_split], p=FLAGS.labeled_p)
 
     elif FLAGS.method == 'baseline':
-        model=Baseline(loss,
-                         mfccs = FLAGS.num_ceps, output_phonemes = corpus.get_phones_len(),
-                         units_per_layer = FLAGS.num_hidden, num_layers = FLAGS.num_layers,
-                         dropout = FLAGS.dropout, optimizer = FLAGS.optimizer, lr=FLAGS.lr)
+        model = Baseline(loss,
+                         mfccs=FLAGS.num_ceps, output_phonemes=corpus.get_phones_len(),
+                         units_per_layer=FLAGS.num_hidden, num_layers=FLAGS.num_layers,
+                         dropout=FLAGS.dropout, optimizer=FLAGS.optimizer, lr=FLAGS.lr)
     else:
         raise Exception('Wrong flag for method')
     model.to(device)
 
-    optimizer=model.get_optimizer()
+    optimizer = model.get_optimizer()
 
-    count_labeled_samples=0
-    count_unlabeled_samples=0
+    count_labeled_samples = 0
+    count_unlabeled_samples = 0
 
     for t in train_targets:
         if not(t is None):
@@ -327,20 +328,20 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
     logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
 
-    bar=tqdm(range(num_epochs))
+    bar = tqdm(range(num_epochs))
     for epoch in bar:
 
         for i in range(0, val_split, FLAGS.batch_size):
 
-            loss_val=0
+            loss_val = 0
             optimizer.zero_grad()
 
             for batch_idx in range(i, min(val_split, i + FLAGS.batch_size)):  # pen and papper
 
-                sample, target=train_data[batch_idx], train_targets[batch_idx]
+                sample, target = train_data[batch_idx], train_targets[batch_idx]
 
-                sample=sample.type(torch.FloatTensor)
-                sample=torch.reshape(
+                sample = sample.type(torch.FloatTensor)
+                sample = torch.reshape(
                     sample, (sample.shape[0], 1, sample.shape[1]))
 
                 if not(target is None):
@@ -564,6 +565,11 @@ def set_seeds(seed):
 
 
 if __name__ == '__main__':
+    flags.DEFINE_string('dataset_root_dir', 'timit',
+                        'The path to the dataset root directory')
+    flags.DEFINE_string('results_save_dir', 'results',
+                        'The path to the directory where all the results are saved')
+                        
     flags.DEFINE_integer('n_fft', 512, 'Size of FFT')
     flags.DEFINE_float('preemphasis_coefficient', 0.97,
                        'Coefficient for use in signal preemphasis')
@@ -574,14 +580,11 @@ if __name__ == '__main__':
 
     flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
-    flags.DEFINE_string('dataset_root_dir', 'timit',
-                        'The path to the dataset root directory')
-    flags.DEFINE_string('results_save_dir', 'results',
-                        'The path to the directory where all the results are saved')
-    flags.DEFINE_integer('hidden', 100, 'number of nodes in each LSTM layer')
+    
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
-    flags.DEFINE_string('loss', 'CrossEntropyLoss',
-                        'The name of loss function')
+        flags.DEFINE_enum('loss', 'CrossEntropyLoss', [
+                      'CrossEntropyLoss', 'CTCLoss'], 'The name of loss function')
+    
     flags.DEFINE_float('labeled_p', 0.1, 'Labeled percentage of data')
     flags.DEFINE_integer('batch_size', 1, 'The batch size')
     flags.DEFINE_enum('method', 'baseline', [
