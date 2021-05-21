@@ -48,7 +48,6 @@ def main(argv):
 
     logging.info("Method: {}".format(FLAGS.method))
     logging.info("labeled_p: {}".format(FLAGS.labeled_p))
-    labeled_p
     logging.info("num_epochs: {}".format(FLAGS.num_epochs))
     logging.info("batch_size: {}".format(FLAGS.batch_size))
     logging.info("num_hidden: {}".format(FLAGS.num_hidden))
