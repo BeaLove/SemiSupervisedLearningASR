@@ -296,7 +296,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
         model = MeanTeacher(mfccs=FLAGS.num_ceps, output_phonemes=corpus.get_phones_len(),
                          units_per_layer=FLAGS.num_hidden, num_layers=FLAGS.num_layers,
-                         dropout=FLAGS.dropout, optimizer=FLAGS.optimizer,
+                         dropout=FLAGS.dropout, optimizer=FLAGS.optimizer, lr=FLAGS.lr,
                          max_steps=10000, ema_decay=0.999, consistency_weight=1.0)
 
         train_targets[0:val_split]=get_targets(
@@ -306,7 +306,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         model=Baseline(loss,
                          mfccs = FLAGS.num_ceps, output_phonemes = corpus.get_phones_len(),
                          units_per_layer = FLAGS.num_hidden, num_layers = FLAGS.num_layers,
-                         dropout = FLAGS.dropout, optimizer = FLAGS.optimizer)
+                         dropout = FLAGS.dropout, optimizer = FLAGS.optimizer, lr=FLAGS.lr)
     else:
         raise Exception('Wrong flag for method')
     model.to(device)

@@ -20,7 +20,7 @@ class Baseline(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-    def __init__(self, loss, mfccs, output_phonemes, units_per_layer, num_layers, dropout, optimizer):
+    def __init__(self, loss, mfccs, output_phonemes, units_per_layer, num_layers, dropout, optimizer, lr):
         super(Baseline, self).__init__()
 
         self.name = 'Baseline'
@@ -33,10 +33,10 @@ class Baseline(nn.Module):
         if (optimizer == 'Adam'):
             # Configuring the Optimizer (ADAptive Moments)
             self.optimizer = torch.optim.Adam(
-                self.model.parameters(), lr=0.001)
+                self.model.parameters(), lr=lr)
         else:
             # Configuring the Optimizer (ADAptive Moments but with normalizing gradients)
-            self.optimizer = AdamNormGrad(self.model.parameters())
+            self.optimizer = AdamNormGrad(self.model.parameters(), lr=lr)
 
     def to(self, device):
         self.model = self.model.to(device)
