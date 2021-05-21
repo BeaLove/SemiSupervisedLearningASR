@@ -8,6 +8,7 @@ from optimizers.ema import ExponetialMovingAverage
 from models.lstm1 import LSTM
 from torch.autograd import Variable
 
+from optimizers.AdaNormGrad import AdamNormGrad
 
 class MeanTeacher(nn.Module):
 
