@@ -569,7 +569,7 @@ if __name__ == '__main__':
                         'The path to the dataset root directory')
     flags.DEFINE_string('results_save_dir', 'results',
                         'The path to the directory where all the results are saved')
-                        
+
     flags.DEFINE_integer('n_fft', 512, 'Size of FFT')
     flags.DEFINE_float('preemphasis_coefficient', 0.97,
                        'Coefficient for use in signal preemphasis')
@@ -580,11 +580,11 @@ if __name__ == '__main__':
 
     flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
-    
+
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
-        flags.DEFINE_enum('loss', 'CrossEntropyLoss', [
+    flags.DEFINE_enum('loss', 'CrossEntropyLoss', [
                       'CrossEntropyLoss', 'CTCLoss'], 'The name of loss function')
-    
+
     flags.DEFINE_float('labeled_p', 0.1, 'Labeled percentage of data')
     flags.DEFINE_integer('batch_size', 1, 'The batch size')
     flags.DEFINE_enum('method', 'baseline', [
