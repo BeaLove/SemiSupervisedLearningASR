@@ -422,10 +422,8 @@ def testModel(test_data, test_targets, num_data, model):
     total = 0
 
     if torch.cuda.is_available():
-        logging.info("Using Cuda")
         device = torch.device('cuda:0')
     else:
-        logging.info("Using cpu")
         device = torch.device('cpu')
 
     model.eval()
