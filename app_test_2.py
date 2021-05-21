@@ -1,3 +1,4 @@
+import copy
 from absl import app
 from absl import flags
 from pathlib import Path
@@ -35,7 +36,6 @@ from mean_teacher import MeanTeacher
 from absl import logging
 logging.set_verbosity(logging.INFO)
 
-import copy
 FLAGS = flags.FLAGS
 
 
@@ -76,10 +76,15 @@ def main(argv):
                                                        num_ceps=FLAGS.num_ceps,
                                                        corpus=corpus))
 
-    if (FLAGS.source == 'dataloader'):
+    if os.path.isdir('tensors') == False:
+        logging.info(
+            "Generate MFCC coefficients and save it in the directory tensors")
+        makedirs('tensors')
+
         # Get the MFCC coefficients
         train_data, max_len = getMFCCFeatures(train_dataset, oneTensor=False)
-        test_data, max_len_test = getMFCCFeatures(test_dataset, oneTensor=False)
+        test_data, max_len_test = getMFCCFeatures(
+            test_dataset, oneTensor=False)
 
         # Get the phonemes per frame
         train_targets = getTargetPhonemes(
@@ -93,8 +98,9 @@ def main(argv):
         writedirs(test_targets, "test_targets.pt")
         writeelem(max_len, "max_len.pt")
         writeelem(max_len_test, "max_len_test.pt")
-        
-    elif (FLAGS.source == 'files'):
+
+    else:
+        logging.info("Load MFCC coefficients from the directory tensors")
         # Get the MFCC coefficients
         train_data = readdirs("train_data.pt", len(train_dataset))
         max_len = readelem("max_len.pt")
@@ -163,22 +169,26 @@ def main(argv):
 def makedirs(path):
     Path(path).mkdir(parents=False, exist_ok=True)
 
+
 def writedirs(mylist, filename):
     for i in range(0, len(mylist)):
-      torch.save(mylist[i], ("tensors/" + str(i) + filename))
+        torch.save(mylist[i], ("tensors/" + str(i) + filename))
+
 
 def readdirs(filename, lim):
     newlist = []
-    for i in range(0, lim):
+    for i in tqdm(range(0, lim)):
         decomc = torch.load(("tensors/" + str(i) + filename))
         newlist.append(decomc)
 
     return newlist
 
+
 def writeelem(element, filename):
     ten = torch.from_numpy(np.array([element]))
 
     torch.save(ten, filename)
+
 
 def readelem(filename):
 
@@ -276,26 +286,29 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         # need to check this. add flag
         consistency_rampup = len(train_data) * 5
 
-        model = MeanTeacher(FLAGS.num_ceps, corpus.get_phones_len(),
-                            size_hidden_layers=FLAGS.num_hidden, max_steps=consistency_rampup,
-                            ema_decay=0.999, consistency_weight=FLAGS.consistency_weight)
+        model = MeanTeacher(mfccs=FLAGS.num_ceps, output_phonemes=corpus.get_phones_len(),
+                         units_per_layer=FLAGS.num_hidden, num_layers=FLAGS.num_layers,
+                         dropout=FLAGS.dropout, optimizer=FLAGS.optimizer,
+                         max_steps=10000, ema_decay=0.999, consistency_weight=1.0)
 
-        train_targets[0:val_split] = get_targets(train_targets[0:val_split], p = FLAGS.labeled_p)
+        train_targets[0:val_split]=get_targets(
+            train_targets[0:val_split], p = FLAGS.labeled_p)
 
     elif FLAGS.method == 'baseline':
-        model = Baseline(loss, mfccs=FLAGS.num_ceps,
-                         output_phonemes=corpus.get_phones_len(), size_hidden_layers=FLAGS.num_hidden,
-                         optimizer=FLAGS.optimizer)
+        model=Baseline(loss,
+                         mfccs = FLAGS.num_ceps, output_phonemes = corpus.get_phones_len(),
+                         units_per_layer = FLAGS.num_hidden, num_layers = FLAGS.num_layers,
+                         dropout = FLAGS.dropout, optimizer = FLAGS.optimizer)
     else:
         raise Exception('Wrong flag for method')
     model.to(device)
 
-    optimizer = model.get_optimizer()
+    optimizer=model.get_optimizer()
 
     logging.info("Method: {}".format(FLAGS.method))
 
-    count_labeled_samples = 0
-    count_unlabeled_samples = 0
+    count_labeled_samples=0
+    count_unlabeled_samples=0
 
     for t in train_targets:
         if not(t is None):
@@ -306,20 +319,20 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     logging.info("Labeled samples: {}".format(count_labeled_samples))
     logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
 
-    bar = tqdm(range(num_epochs))
+    bar=tqdm(range(num_epochs))
     for epoch in bar:
 
         for i in range(0, val_split, FLAGS.batch_size):
 
-            loss_val = 0
+            loss_val=0
             optimizer.zero_grad()
 
-            for batch_idx in range(i, min(val_split, i + FLAGS.batch_size)): #pen and papper 
+            for batch_idx in range(i, min(val_split, i + FLAGS.batch_size)):  # pen and papper
 
-                sample, target = train_data[batch_idx], train_targets[batch_idx]
+                sample, target=train_data[batch_idx], train_targets[batch_idx]
 
-                sample = sample.type(torch.FloatTensor)
-                sample = torch.reshape(
+                sample=sample.type(torch.FloatTensor)
+                sample=torch.reshape(
                     sample, (sample.shape[0], 1, sample.shape[1]))
 
                 if not(target is None):
@@ -342,7 +355,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
                 sample, (sample.shape[0], 1, sample.shape[1]))
 
             loss_val = model.loss_fn(device, sample, target)
-            #loss_val = loss_fn(model, loss, device, sample, target)
+            # loss_val = loss_fn(model, loss, device, sample, target)
             val_losses.append(loss_val.item())
 
             if loss_val < min_val_loss:
@@ -407,7 +420,7 @@ def testModel(test_data, test_targets, num_data, model):
 
     model.eval()
 
-    #bar = tqdm(range(num_data))
+    # bar = tqdm(range(num_data))
 
     for i in range(num_data):
         sample = test_data[i]
@@ -438,7 +451,7 @@ def getMFCCFeatures(dataset, zeropad=False, oneTensor=False):
     tensors = []
     max_frames = -1
 
-    for i in range(len(dataset)):
+    for i in tqdm(range(len(dataset))):
         sample = dataset[i]
         audio = np.asarray(sample['audio'])
         if(max_frames < audio.shape[0]):
@@ -471,7 +484,7 @@ def getTargetPhonemes(dataset, max_frames, corpus, zeropad=False, oneTensor=Fals
     tensors = []
     targets = []
 
-    for i in range(len(dataset)):
+    for i in tqdm(range(len(dataset))):
         sample = dataset[i]
         phoneme_list = sample['phonemes_per_frame']
         sample_targets = []
@@ -570,7 +583,8 @@ if __name__ == '__main__':
     flags.DEFINE_enum('optimizer', 'AdamNormGrad', [
                       'Adam', 'AdamNormGrad'], 'The optimizer: Adam, AdamNormGrad (Adam with normalizing gradients)')
     flags.DEFINE_integer('num_hidden', 100, 'Size of hidden layer.')
-    flags.DEFINE_enum('source', 'dataloader', [
-                      'dataloader', 'files'], 'The data loading source: data loader, hard disk.')
+    flags.DEFINE_integer('num_layers', 1, 'The number of layers.')
+    flags.DEFINE_float(
+        'dropout', 0.1, 'If non-zero, introduces a Dropout layer on the outputs of each LSTM layer except the last layer, with dropout probability equal to dropout')
 
     app.run(main)

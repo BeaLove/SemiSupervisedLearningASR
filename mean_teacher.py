@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from optimizers import ema.py
+from optimizers import ema
 from optimizers.ema import ExponetialMovingAverage
 from models.lstm1 import LSTM
 from torch.autograd import Variable
@@ -23,7 +23,7 @@ class MeanTeacher(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-    def __init__(self, mfccs, output_phonemes, size_hidden_layers, max_steps=10000, ema_decay=0.999, consistency_weight=1.0):
+    def __init__(self, mfccs, output_phonemes, units_per_layer, num_layers, dropout, max_steps=10000, ema_decay=0.999, consistency_weight=1.0):
         super(MeanTeacher, self).__init__()
 
         self.name = 'MeanTeacher'
@@ -37,8 +37,10 @@ class MeanTeacher(nn.Module):
         self.loss_consistency = nn.MSELoss()
         self.loss_class = nn.CrossEntropyLoss()
 
-        self.student = LSTM(mfccs, output_phonemes, size_hidden_layers)
-        self.teacher = LSTM(mfccs, output_phonemes, size_hidden_layers)
+        self.student = self.model = LSTM(mfccs, output_phonemes, units_per_layer,
+                          num_layers, dropout, name='student.pth')
+        self.teacher = self.model = LSTM(mfccs, output_phonemes, units_per_layer,
+                          num_layers, dropout, name='teacher.pth')
 
         self.teacher.load_state_dict(self.student.state_dict())
 
