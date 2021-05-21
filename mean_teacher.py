@@ -23,7 +23,7 @@ class MeanTeacher(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-    def __init__(self, mfccs, output_phonemes, units_per_layer, num_layers, dropout, , optimizer, max_steps=10000, ema_decay=0.999, consistency_weight=1.0):
+    def __init__(self, mfccs, output_phonemes, units_per_layer, num_layers, dropout, optimizer, max_steps=10000, ema_decay=0.999, consistency_weight=1.0):
         super(MeanTeacher, self).__init__()
 
         self.name = 'MeanTeacher'
