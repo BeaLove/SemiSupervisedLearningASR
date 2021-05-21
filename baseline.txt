@@ -1,0 +1,54 @@
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from models.lstm1 import LSTM
+
+
+class Baseline(nn.Module):
+
+    # Todo
+    # Loss
+    # Dropout or add noise - read how
+
+    # Mean Teacher algorithm:
+    # 1. Take a supervised architecture and make a copy of it. Let's call the original model the student and the new one the teacher.
+    # 2. At each training step, use the same minibatch as inputs to both the student and the teacher but add random augmentation or noise to the inputs separately.
+    # 3. Add an additional consistency cost between the student and teacher outputs (after softmax).
+    # 4. Let the optimizer update the student weights normally.
+    # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
+
+	
+    def __init__(self, loss, mfccs, output_phonemes, size_hidden_layers):
+        super(Baseline, self).__init__()
+
+        self.name = 'Baseline'
+
+        self.loss = loss
+
+        self.model = LSTM(mfccs, output_phonemes, size_hidden_layers)
+
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+
+    def to(self, device):
+        self.model = self.model.to(device)
+		return self.model(x)
+	
+	def loss_fn(self, device, data, target):
+        data = data.to(device)
+        target = target.to(device)
+        prediction = self.model.forward(data)
+        prediction = torch.squeeze(prediction, dim=1)
+
+	return self.loss(prediction, target)
+		
+	
+    def train_step(self, device, u_data, l_data, target):
+
+        self.optimizer.zero_grad()
+        loss_val = self.loss_fn(device, l_data, target)
+        loss_val.backward()
+        self.optimizer.step()
+		
+	return loss_val

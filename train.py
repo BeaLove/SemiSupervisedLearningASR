@@ -17,6 +17,13 @@ from models.lstm1 import LSTM
 from absl import flags
 from datasets.TIMITdataset import TimitDataset
 
+from mean_teacher import MeanTeacher
+from baseline import Baseline
+
+from absl import logging
+
+logging.set_verbosity(logging.INFO)
+
 FLAGS = flags.FLAGS
 
 
@@ -50,7 +57,11 @@ def main(args):
     model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100, num_layers=5)
 
     model, avg_val_losses, avg_train_losses = train(
+<<<<<<< HEAD
+        dataset, method=FLAGS.method, num_epochs=FLAGS.num_epochs)
+=======
         dataset, model, num_epochs=FLAGS.num_epochs)
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
 
     torch.save(model.state_dict(), save_path)
 
@@ -59,8 +70,14 @@ def main(args):
     np.savetxt(os.path.abspath(os.path.join(FLAGS.results_save_dir,
                'avg_train_losses.txt')), np.asarray(avg_train_losses), delimiter=',')
 
-    plt.plot(avg_train_losses)
-    plt.plot(avg_val_losses)
+    iterations = range(1, len(avg_train_losses)+1)
+    plt.plot(iterations, avg_train_losses, 'g', label='Training loss')
+    plt.plot(iterations, avg_val_losses, 'b', label='validation loss')
+    plt.title('Average training vs validation loss')
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.legend()
+
     plt.savefig(os.path.abspath(os.path.join(
         FLAGS.results_save_dir, 'loss_plot.png')))
 
@@ -77,6 +94,15 @@ def main(args):
 def loss_fn(model, loss, device, data, target):
     data = data.to(device)
     target = target.to(device)
+    target = torch.squeeze(target, dim=0)
+
+    output_teacher, output_student = mean_teacher.forward(data)
+
+    output_teacher, output_student = torch.squeeze(
+        output_teacher, dim=0), torch.squeeze(output_student, dim=0)
+
+    prediction_2 = torch.squeeze(prediction, dim=0)
+
     prediction = model.forward(data)
 
     prediction_2 = torch.squeeze(prediction, dim=0)
@@ -85,29 +111,45 @@ def loss_fn(model, loss, device, data, target):
     return loss(prediction_2, target_2)
 
 
+<<<<<<< HEAD
+def train(dataset, num_epochs, method, batch_size=1):
+=======
 def train(dataset, model, num_epochs, batch_size=1, tuning=False):
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
     train_losses = []
     avg_train_losses = []
     avg_val_losses = []
     accuracies = []
+<<<<<<< HEAD
+    patience = 20
+=======
     patience = 15
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
     min_epochs = 5
     epochs_no_improve = 0
     early_stop = False
     min_val_loss = torch.tensor(10000)
 
-    val_split = int(len(dataset)*0.15)
+    val_split = int(len(dataset)*FLAGS.ratio_validation_data)
     train_data, val_data = torch.utils.data.random_split(dataset, [len(dataset) - val_split, val_split],
                                                          generator=torch.Generator().manual_seed(15))
+
+    unlabeled_split = int(len(train_data)*(1 - FLAGS.ratio_labeled_data))
+    labeled_train_data, unlabeled_train_data = torch.utils.data.random_split(train_data, [len(train_data) - unlabeled_split, unlabeled_split],
+                                                                             generator=torch.Generator().manual_seed(15))
+
     if torch.cuda.is_available():
-        print('using cuda')
+        logging.info('Using cuda')
         device = torch.device('cuda:0')
     else:
-        print('using cpu')
+        logging.info('Using cpu')
         device = torch.device('cpu')
 
-    train_loader = torch.utils.data.DataLoader(
-        train_data, batch_size=batch_size, num_workers=3, shuffle=True)
+    labeled_train_loader = torch.utils.data.DataLoader(
+        labeled_train_data, batch_size=batch_size, num_workers=3, shuffle=True)
+
+    unlabeled_train_loader = torch.utils.data.DataLoader(
+        unlabeled_train_data, batch_size=batch_size, num_workers=3, shuffle=True)
     '''if batch_size > 1:
         train_loader = torch.nn.utils.rnn.pad_packed_sequence(train_loader)'''
     val_loader = torch.utils.data.DataLoader(
@@ -123,30 +165,105 @@ def train(dataset, model, num_epochs, batch_size=1, tuning=False):
     # model = LSTMModel(input_dim=13, hidden_dim=500,
     #                  layer_dim=1, output_dim=dataset.num_labels)
 
-    model.to(device)
+<<<<<<< HEAD
+    #model = LSTM(FLAGS.num_ceps, dataset.num_labels, size_hidden_layers=100)
+    if method == 'mean_teacher':
+        consistency_rampup = len(unlabeled_train_loader) * 5
 
+        model = MeanTeacher(FLAGS.num_ceps, dataset.num_labels,
+                            size_hidden_layers=100, max_steps=consistency_rampup,
+                            ema_decay=0.999, consistency_weight=FLAGS.consistency_weight)
+
+    elif method == 'baseline':
+        model = Baseline(FLAGS.num_ceps, dataset.num_labels,
+                         size_hidden_layers=100)
+    else:
+        raise Exception('Wrong flag for method')
+
+    logging.info("Method: {}".format(method))
+    logging.info("Labeled samples: {}".format(len(labeled_train_loader)))
+    logging.info("Unlabeled samples: {}".format(len(unlabeled_train_loader)))
+
+=======
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
+    model.to(device)
+    optimizer = model.get_optimizer()
+
+<<<<<<< HEAD
+    # optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
+    #    0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+    #early_stop = EarlyStopping(patience=patience, verbose=True)
+=======
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(
         0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
 
     bar = tqdm(range(num_epochs))
 
     for epoch in bar:
 
-        for batch in train_loader:
-            data, target = batch
+        l_iter = iter(labeled_train_loader)
 
-            optimizer.zero_grad()
-            loss_value = loss_fn(model, loss, device, data, target)
-            loss_value.backward()
-            optimizer.step()
+        for u_batch in unlabeled_train_loader:
+            u_data, _ = u_batch
+
+            u_data = u_data.to(device)
+
+            try:
+                l_data, target, = next(l_iter)
+            except StopIteration:
+                l_iter = iter(labeled_train_loader)
+                l_data, target, = next(l_iter)
+
+            l_data, target = l_data.to(device), target.to(device)
+
+            loss_value = model.train_step(device, u_data, l_data, target)
 
             train_losses.append(loss_value.item())
 
         avg_train_losses.append(np.average(train_losses))
 
+<<<<<<< HEAD
+        model.eval()
+        for data, target in val_loader:
+            data, target = data.to(device), target.to(device)
+            target = torch.squeeze(target, dim=0)
+
+            output = model.forward(data)
+
+            loss_value = model.loss_fn(output, target)
+
+            val_losses.append(loss_value.item())
+#             print('local value')
+#             print(val_losses)
+#             print('minimum value loss')
+#             print(min_val_loss)
+            if loss_value < min_val_loss:
+                epochs_no_improve = 0
+                min_val_loss = loss_value
+#                 print("NONE IMPROVEMENT")
+                torch.save(model.state_dict(
+                ), '{}/checkpoints/epoch{}earlystop{}'.format(FLAGS.results_save_dir, epoch, FLAGS.name))
+            else:
+                epochs_no_improve += 1
+#                 print("IMPROVE epochs ")
+            if epoch > min_epochs and epochs_no_improve == patience:
+                print("Early stopping!")
+                early_stop = True
+                break
+            else:
+                continue
+
+        avg_val_loss = np.average(val_losses)
+        avg_val_losses.append(avg_val_loss)
+
+        accuracy = validate(val_loader, model, device)
+
+=======
         accuracy, loss_value = validate(val_loader, model, loss, device)
         avg_val_losses.append(loss_value)
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
         accuracies.append(accuracy)
         if loss_value < min_val_loss:
             print("HERE")
@@ -200,18 +317,25 @@ def validate(val_loader, model, loss, device):
     correct = 0
     total = 0
     model.eval()
+<<<<<<< HEAD
+    for point in val_loader:
+=======
     val_losses = []
 
     for point in tqdm(val_loader):
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
         sample, target = point
         sample = sample.to(device)
         target = target.to(device)
 
         output = model.forward(sample)
+<<<<<<< HEAD
+=======
         val_losses.append(loss(torch.squeeze(output), torch.squeeze(target)))
 
         output = torch.squeeze(output, dim=0)
 
+>>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
         _, prediction = torch.max(output, dim=1)
 
         correct += (prediction == target).sum()
@@ -233,7 +357,7 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 100, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
     flags.DEFINE_string('dataset_root_dir', 'timit',
                         'The path to the dataset root directory')
@@ -243,5 +367,12 @@ if __name__ == '__main__':
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
     flags.DEFINE_string('loss', 'CrossEntropyLoss',
                         'The name of loss function')
+    flags.DEFINE_enum('method', 'baseline', [
+                      'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
+    flags.DEFINE_float('ratio_labeled_data', 0.1, 'Ratio of unlabeled data.')
+    flags.DEFINE_float('ratio_validation_data', 0.15,
+                       'Ratio of validation data.')
+    flags.DEFINE_float('consistency_weight', 1.0,
+                       'The consistency weight for the mean teacher loss.')
 
     app.run(main)

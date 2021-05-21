@@ -14,6 +14,18 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+class WrapperDataset(Dataset):
+    def __init__(self, data, targets):
+        self.data = data
+        self.targets = targets
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.targets[idx]
+
+
 class TimitDataset(Dataset):
     """Timit dataset."""
 
@@ -25,7 +37,7 @@ class TimitDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.audio_frame = pd.read_csv(os.path.join(root_dir, csv_file))
+        self.audio_frame = pd.read_csv(os.path.join(root_dir, csv_file))#.head(550)
         self.audio_frame = self.audio_frame[self.audio_frame['is_converted_audio'] == True]
 
         self.root_dir = root_dir
@@ -67,10 +79,10 @@ class TimitDataset(Dataset):
         if self.transcription:
             phonemes_per_frame = self.transcription(sample)
             sample['phonemes_per_frame'], max_len = phonemes_per_frame
-            
+
             if(max_len < sample['max_frames']):
                 sample_audio = sample['audio'].numpy()
-                sample_audio = sample_audio[0:max_len,:]
+                sample_audio = sample_audio[0:max_len, :]
                 sample['audio'] = torch.tensor(sample_audio, dtype=torch.float)
 
         return sample

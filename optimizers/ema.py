@@ -1,6 +1,5 @@
 import torch
 
-
 class ExponetialMovingAverage(object):
     def __init__(self, model, ema_model, alpha=0.999):
         self.model = model

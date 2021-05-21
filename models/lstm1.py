@@ -1,5 +1,6 @@
 import torch.cuda
 import torch.nn as nn
+import torch.nn.functional as F
 
 class LSTM(nn.Module):
     def __init__(self, mfccs, output_phonemes, units_per_layer, num_layers, dropout, name='vanillaLSTMfullylabeled.pth'):
@@ -13,3 +14,4 @@ class LSTM(nn.Module):
     def forward(self, x):
         x, _ = self.hidden_layers(x)
         return self.output_layer(x)
+

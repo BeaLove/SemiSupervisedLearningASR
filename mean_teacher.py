@@ -3,12 +3,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
+from optimizers import ema
 from optimizers.ema import ExponetialMovingAverage
 from models.lstm1 import LSTM
 from torch.autograd import Variable
-from optimizers.AdaNormGrad import AdamNormGrad
 
+from optimizers.AdaNormGrad import AdamNormGrad
 
 class MeanTeacher(nn.Module):
 
@@ -24,7 +24,7 @@ class MeanTeacher(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-    def __init__(self, mfccs, output_phonemes, size_hidden_layers, max_steps=10000, ema_decay=0.999, consistency_weight=1.0, optimizer = 'Adam'):
+    def __init__(self, mfccs, output_phonemes, units_per_layer, num_layers, dropout, optimizer, max_steps=10000, ema_decay=0.999, consistency_weight=1.0):
         super(MeanTeacher, self).__init__()
 
         self.name = 'MeanTeacher'
@@ -38,8 +38,10 @@ class MeanTeacher(nn.Module):
         self.loss_consistency = nn.MSELoss()
         self.loss_class = nn.CrossEntropyLoss()
 
-        self.student = LSTM(mfccs, output_phonemes, size_hidden_layers)
-        self.teacher = LSTM(mfccs, output_phonemes, size_hidden_layers)
+        self.student = self.model = LSTM(mfccs, output_phonemes, units_per_layer,
+                          num_layers, dropout, name='student.pth')
+        self.teacher = self.model = LSTM(mfccs, output_phonemes, units_per_layer,
+                          num_layers, dropout, name='teacher.pth')
 
         self.teacher.load_state_dict(self.student.state_dict())
 
@@ -48,10 +50,12 @@ class MeanTeacher(nn.Module):
 
         if (optimizer == 'Adam'):
             # Configuring the Optimizer (ADAptive Moments)
-            self.optimizer = torch.optim.Adam(self.student.parameters(), lr=0.001)
+            self.optimizer = torch.optim.Adam(
+                self.student.parameters(), lr=0.001)
         else:
             # Configuring the Optimizer (ADAptive Moments but with normalizing gradients)
             self.optimizer = AdamNormGrad(self.student.parameters())
+
 
     def to(self, device):
         self.student = self.student.to(device)
@@ -91,3 +95,11 @@ class MeanTeacher(nn.Module):
 
     def linear_ramp_up(self):
         return min(float(self.step) / self.max_steps, 1.0)
+
+    def sigmoid_rampup(current, rampup_length):
+        if rampup_length == 0:
+            return 1.0
+        else:
+            current = np.clip(current, 0.0, rampup_length)
+            phase = 1.0 - current / rampup_length
+            return float(np.exp(-5.0 * phase * phase))
