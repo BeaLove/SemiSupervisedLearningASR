@@ -4,10 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from models.lstm1 import LSTM
-<<<<<<< HEAD
-=======
 from optimizers.AdaNormGrad import AdamNormGrad
->>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
 
 
 class Baseline(nn.Module):
@@ -23,11 +20,7 @@ class Baseline(nn.Module):
     # 4. Let the optimizer update the student weights normally.
     # 5. Let the teacher weights be an exponential moving average (EMA) of the student weights. That is, after each training step, update the teacher weights a little bit toward the student weights.
 
-<<<<<<< HEAD
-    def __init__(self, loss, mfccs, output_phonemes, size_hidden_layers):
-=======
     def __init__(self, loss, mfccs, output_phonemes, size_hidden_layers, optimizer):
->>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
         super(Baseline, self).__init__()
 
         self.name = 'Baseline'
@@ -36,16 +29,12 @@ class Baseline(nn.Module):
 
         self.model = LSTM(mfccs, output_phonemes, size_hidden_layers)
 
-<<<<<<< HEAD
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
-=======
         if (optimizer == 'Adam'):
             # Configuring the Optimizer (ADAptive Moments)
             self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         else:
             # Configuring the Optimizer (ADAptive Moments but with normalizing gradients)
             self.optimizer = AdamNormGrad(self.model.parameters())
->>>>>>> c669ba5f17eac9e5cf25109d4ce2185b0f401dfc
 
     def to(self, device):
         self.model = self.model.to(device)
