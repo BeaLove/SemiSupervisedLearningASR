@@ -2,10 +2,6 @@ import torch.cuda
 import torch.nn as nn
 
 class LSTM(nn.Module):
-
-    num_layers = 1
-    dropout = 0
-    units_per_layer = 100
     def __init__(self, mfccs, output_phonemes, units_per_layer, num_layers, dropout, name='vanillaLSTMfullylabeled.pth'):
         super(LSTM, self).__init__()
         '''input: number of mfcc coefficients, number of output phonemes, layer dimensions in a list
