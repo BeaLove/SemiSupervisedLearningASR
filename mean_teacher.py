@@ -99,7 +99,7 @@ class MeanTeacher(nn.Module):
     def update_rampup(self, epoch, rampup_length):
         self.consistency_weight = self.sigmoid_rampup(epoch, rampup_length)
 
-    def sigmoid_rampup(current, rampup_length):
+    def sigmoid_rampup(self, current, rampup_length):
         current = np.clip(current, 0.0, rampup_length)
         phase = 1.0 - current / rampup_length
         return float(np.exp(-5.0 * phase * phase))
