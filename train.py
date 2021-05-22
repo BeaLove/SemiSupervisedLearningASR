@@ -324,13 +324,16 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         if not(t is None):
             count_labeled_samples += 1
         else:
-            count_unlabeled_samples +=1
+            count_unlabeled_samples += 1
 
     logging.info("Labeled samples: {}".format(count_labeled_samples))
     logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
 
     bar = tqdm(range(num_epochs))
     for epoch in bar:
+
+        if FLAGS.method == 'mean_teacher':
+            model.update_rampup(epoch, FLAGS.consistency_rampup)
 
         for i in range(0, val_split, FLAGS.batch_size):
 
@@ -584,12 +587,14 @@ if __name__ == '__main__':
     flags.DEFINE_enum('loss', 'CrossEntropyLoss', [
                       'CrossEntropyLoss', 'CTCLoss'], 'The name of loss function')
 
-    flags.DEFINE_float('labeled_p', 1.0, 'Labeled percentage of data')
+    flags.DEFINE_float('labeled_p', 0.95, 'Labeled percentage of data')
     flags.DEFINE_integer('batch_size', 1, 'The batch size')
     flags.DEFINE_enum('method', 'baseline', [
                       'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
     flags.DEFINE_float('consistency_weight', 1.0,
                        'The consistency weight for the mean teacher loss.')
+    flags.DEFINE_integer('consistency_rampup', 5,
+                         'The rampup for the consistency weight')
     flags.DEFINE_enum('optimizer', 'AdamNormGrad', [
                       'Adam', 'AdamNormGrad'], 'The optimizer: Adam, AdamNormGrad (Adam with normalizing gradients)')
     flags.DEFINE_integer('num_hidden', 100, 'Size of hidden layer.')
