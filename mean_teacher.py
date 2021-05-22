@@ -29,11 +29,15 @@ class MeanTeacher(nn.Module):
 
         self.name = 'MeanTeacher'
         self.consistency_weight = consistency_weight
+        self.current_consistency_weight = 0
+        
         self.max_steps = max_steps
         self.step = 0
 
         self.std = 0.15  # Need to check
         self.mean = 0.0
+
+        self.update_rampup()
 
         self.loss_consistency = nn.MSELoss()
         self.loss_class = nn.CrossEntropyLoss()
@@ -83,7 +87,7 @@ class MeanTeacher(nn.Module):
             loss += self.loss_class(self.forward_student(sample +
                                     torch.randn(sample.size()).to(device) * self.std), targets)
 
-        loss += self.consistency_weight * self.loss_consistency(self.forward_student(sample + torch.randn(sample.size()).to(device) * self.std),
+        loss += self.current_consistency_weight * self.loss_consistency(self.forward_student(sample + torch.randn(sample.size()).to(device) * self.std),
                                                                 self.forward_teacher(sample + torch.randn(sample.size()).to(device) * self.std))
 
         return loss
@@ -97,7 +101,7 @@ class MeanTeacher(nn.Module):
         return min(float(self.step) / self.max_steps, 1.0)
 
     def update_rampup(self, epoch, rampup_length):
-        self.consistency_weight = self.sigmoid_rampup(epoch, rampup_length)
+        self.current_consistency_weight = self.consistency_weight * self.sigmoid_rampup(epoch, rampup_length)
 
     def sigmoid_rampup(self, current, rampup_length):
         current = np.clip(current, 0.0, rampup_length)
