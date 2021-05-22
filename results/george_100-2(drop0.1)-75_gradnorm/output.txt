@@ -1,0 +1,333 @@
+I0522 12:11:20.090125 140346421790528 train.py:49] Method: baseline
+I0522 12:11:20.090295 140346421790528 train.py:50] labeled_p: 0.1
+I0522 12:11:20.090345 140346421790528 train.py:51] num_epochs: 100
+I0522 12:11:20.090386 140346421790528 train.py:52] batch_size: 1
+I0522 12:11:20.090424 140346421790528 train.py:53] num_hidden: 75
+I0522 12:11:20.090460 140346421790528 train.py:54] num_layers: 2
+I0522 12:11:20.090497 140346421790528 train.py:55] dropout: 0.1
+I0522 12:11:20.090533 140346421790528 train.py:56] optimizer: AdamNormGrad
+I0522 12:11:20.090570 140346421790528 train.py:57] lr: 0.001
+I0522 12:11:20.165866 140346421790528 train.py:113] Load MFCC coefficients from the directory tensors
+100%|█████████████████████████████████████| 4620/4620 [00:00<00:00, 9995.85it/s]
+100%|████████████████████████████████████| 1680/1680 [00:00<00:00, 10037.52it/s]
+100%|████████████████████████████████████| 4620/4620 [00:00<00:00, 10911.64it/s]
+100%|████████████████████████████████████| 1680/1680 [00:00<00:00, 10844.00it/s]
+I0522 12:11:21.517759 140346421790528 train.py:283] Using Cuda
+I0522 12:11:23.663821 140346421790528 train.py:327] Labeled samples: 4620
+I0522 12:11:23.663916 140346421790528 train.py:328] Unlabeled samples: 0
+I0522 12:11:23.663962 140346421790528 train.py:330] Unlabeled samples: 0
+  0%|                                                   | 0/100 [00:00<?, ?it/s]I0522 12:12:01.877269 140346421790528 train.py:425] Using Cuda
+I0522 12:12:14.607831 140346421790528 train.py:425] Using Cuda
+I0522 12:12:15.247124 140346421790528 train.py:425] Using Cuda
+train_loss 2.016; val_loss 1.787, train_accuracy 50.970, val_accuracy 49.942, teI0522 12:12:58.010338 140346421790528 train.py:425] Using Cuda
+I0522 12:13:10.909327 140346421790528 train.py:425] Using Cuda
+I0522 12:13:11.549620 140346421790528 train.py:425] Using Cuda
+train_loss 1.834; val_loss 1.701, train_accuracy 54.814, val_accuracy 53.851, teI0522 12:13:54.100296 140346421790528 train.py:425] Using Cuda
+I0522 12:14:06.767093 140346421790528 train.py:425] Using Cuda
+I0522 12:14:07.406091 140346421790528 train.py:425] Using Cuda
+train_loss 1.738; val_loss 1.652, train_accuracy 56.483, val_accuracy 55.229, teI0522 12:14:50.047637 140346421790528 train.py:425] Using Cuda
+I0522 12:15:03.093122 140346421790528 train.py:425] Using Cuda
+I0522 12:15:03.748599 140346421790528 train.py:425] Using Cuda
+train_loss 1.675; val_loss 1.617, train_accuracy 57.612, val_accuracy 56.490, teI0522 12:15:46.733440 140346421790528 train.py:425] Using Cuda
+I0522 12:15:59.779398 140346421790528 train.py:425] Using Cuda
+I0522 12:16:00.431912 140346421790528 train.py:425] Using Cuda
+train_loss 1.630; val_loss 1.592, train_accuracy 58.284, val_accuracy 56.940, teI0522 12:16:45.737455 140346421790528 train.py:425] Using Cuda
+I0522 12:16:58.927781 140346421790528 train.py:425] Using Cuda
+I0522 12:16:59.598195 140346421790528 train.py:425] Using Cuda
+train_loss 1.595; val_loss 1.575, train_accuracy 58.613, val_accuracy 57.085, teI0522 12:17:44.356494 140346421790528 train.py:425] Using Cuda
+I0522 12:17:57.936274 140346421790528 train.py:425] Using Cuda
+I0522 12:17:58.631933 140346421790528 train.py:425] Using Cuda
+train_loss 1.567; val_loss 1.558, train_accuracy 59.326, val_accuracy 57.780, teI0522 12:18:43.984218 140346421790528 train.py:425] Using Cuda
+I0522 12:18:57.154438 140346421790528 train.py:425] Using Cuda
+I0522 12:18:57.819315 140346421790528 train.py:425] Using Cuda
+train_loss 1.544; val_loss 1.544, train_accuracy 59.616, val_accuracy 57.732, teI0522 12:19:43.245424 140346421790528 train.py:379] Early stopping!
+I0522 12:19:43.245741 140346421790528 train.py:425] Using Cuda
+I0522 12:19:56.514525 140346421790528 train.py:425] Using Cuda
+I0522 12:19:57.215799 140346421790528 train.py:425] Using Cuda
+train_loss 1.525; val_loss 1.535, train_accuracy 59.975, val_accuracy 57.979, teI0522 12:20:42.683281 140346421790528 train.py:425] Using Cuda
+I0522 12:20:55.676142 140346421790528 train.py:425] Using Cuda
+I0522 12:20:56.317802 140346421790528 train.py:425] Using Cuda
+train_loss 1.508; val_loss 1.523, train_accuracy 60.273, val_accuracy 58.317, teI0522 12:21:40.805559 140346421790528 train.py:379] Early stopping!
+I0522 12:21:40.805847 140346421790528 train.py:425] Using Cuda
+I0522 12:21:53.466010 140346421790528 train.py:425] Using Cuda
+I0522 12:21:54.103052 140346421790528 train.py:425] Using Cuda
+train_loss 1.493; val_loss 1.522, train_accuracy 60.207, val_accuracy 58.303, teI0522 12:22:37.446121 140346421790528 train.py:379] Early stopping!
+I0522 12:22:37.446439 140346421790528 train.py:425] Using Cuda
+I0522 12:22:50.332365 140346421790528 train.py:425] Using Cuda
+I0522 12:22:51.149537 140346421790528 train.py:425] Using Cuda
+train_loss 1.480; val_loss 1.514, train_accuracy 60.878, val_accuracy 58.774, teI0522 12:23:37.990144 140346421790528 train.py:425] Using Cuda
+I0522 12:23:51.551336 140346421790528 train.py:425] Using Cuda
+I0522 12:23:52.255445 140346421790528 train.py:425] Using Cuda
+train_loss 1.468; val_loss 1.506, train_accuracy 60.917, val_accuracy 58.451, teI0522 12:24:37.331842 140346421790528 train.py:425] Using Cuda
+I0522 12:24:50.313655 140346421790528 train.py:425] Using Cuda
+I0522 12:24:50.986013 140346421790528 train.py:425] Using Cuda
+train_loss 1.458; val_loss 1.497, train_accuracy 61.315, val_accuracy 59.095, teI0522 12:25:36.316485 140346421790528 train.py:425] Using Cuda
+I0522 12:25:49.611177 140346421790528 train.py:425] Using Cuda
+I0522 12:25:50.277147 140346421790528 train.py:425] Using Cuda
+train_loss 1.448; val_loss 1.490, train_accuracy 61.365, val_accuracy 59.091, teI0522 12:26:33.341393 140346421790528 train.py:379] Early stopping!
+I0522 12:26:33.341725 140346421790528 train.py:425] Using Cuda
+I0522 12:26:46.043532 140346421790528 train.py:425] Using Cuda
+I0522 12:26:46.683893 140346421790528 train.py:425] Using Cuda
+train_loss 1.440; val_loss 1.489, train_accuracy 61.456, val_accuracy 58.962, teI0522 12:27:28.951267 140346421790528 train.py:379] Early stopping!
+I0522 12:27:28.951608 140346421790528 train.py:425] Using Cuda
+I0522 12:27:41.728018 140346421790528 train.py:425] Using Cuda
+I0522 12:27:42.372041 140346421790528 train.py:425] Using Cuda
+train_loss 1.432; val_loss 1.484, train_accuracy 61.831, val_accuracy 59.036, teI0522 12:28:24.971040 140346421790528 train.py:425] Using Cuda
+I0522 12:28:37.609298 140346421790528 train.py:425] Using Cuda
+I0522 12:28:38.245818 140346421790528 train.py:425] Using Cuda
+train_loss 1.424; val_loss 1.479, train_accuracy 61.766, val_accuracy 59.055, teI0522 12:29:20.874522 140346421790528 train.py:425] Using Cuda
+I0522 12:29:33.512638 140346421790528 train.py:425] Using Cuda
+I0522 12:29:34.148910 140346421790528 train.py:425] Using Cuda
+train_loss 1.418; val_loss 1.474, train_accuracy 61.987, val_accuracy 59.102, teI0522 12:30:16.797863 140346421790528 train.py:425] Using Cuda
+I0522 12:30:29.608576 140346421790528 train.py:425] Using Cuda
+I0522 12:30:30.254829 140346421790528 train.py:425] Using Cuda
+train_loss 1.411; val_loss 1.470, train_accuracy 62.087, val_accuracy 59.117, teI0522 12:31:13.077722 140346421790528 train.py:425] Using Cuda
+I0522 12:31:25.799206 140346421790528 train.py:425] Using Cuda
+I0522 12:31:26.435251 140346421790528 train.py:425] Using Cuda
+train_loss 1.406; val_loss 1.466, train_accuracy 62.147, val_accuracy 58.964, teI0522 12:32:09.090151 140346421790528 train.py:425] Using Cuda
+I0522 12:32:21.757323 140346421790528 train.py:425] Using Cuda
+I0522 12:32:22.392636 140346421790528 train.py:425] Using Cuda
+train_loss 1.400; val_loss 1.463, train_accuracy 62.083, val_accuracy 59.119, teI0522 12:33:04.917904 140346421790528 train.py:425] Using Cuda
+I0522 12:33:17.569694 140346421790528 train.py:425] Using Cuda
+I0522 12:33:18.206536 140346421790528 train.py:425] Using Cuda
+train_loss 1.395; val_loss 1.460, train_accuracy 62.227, val_accuracy 58.926, teI0522 12:34:00.979245 140346421790528 train.py:425] Using Cuda
+I0522 12:34:13.730641 140346421790528 train.py:425] Using Cuda
+I0522 12:34:14.373820 140346421790528 train.py:425] Using Cuda
+train_loss 1.390; val_loss 1.457, train_accuracy 62.153, val_accuracy 59.264, teI0522 12:34:57.265965 140346421790528 train.py:425] Using Cuda
+I0522 12:35:09.968700 140346421790528 train.py:425] Using Cuda
+I0522 12:35:10.611086 140346421790528 train.py:425] Using Cuda
+train_loss 1.386; val_loss 1.455, train_accuracy 62.268, val_accuracy 59.136, teI0522 12:35:53.157283 140346421790528 train.py:425] Using Cuda
+I0522 12:36:05.822906 140346421790528 train.py:425] Using Cuda
+I0522 12:36:06.459469 140346421790528 train.py:425] Using Cuda
+train_loss 1.381; val_loss 1.452, train_accuracy 62.499, val_accuracy 59.053, teI0522 12:36:49.047790 140346421790528 train.py:425] Using Cuda
+I0522 12:37:01.698628 140346421790528 train.py:425] Using Cuda
+I0522 12:37:02.334002 140346421790528 train.py:425] Using Cuda
+train_loss 1.377; val_loss 1.450, train_accuracy 62.380, val_accuracy 59.005, teI0522 12:37:44.964741 140346421790528 train.py:425] Using Cuda
+I0522 12:37:57.639439 140346421790528 train.py:425] Using Cuda
+I0522 12:37:58.277277 140346421790528 train.py:425] Using Cuda
+train_loss 1.373; val_loss 1.448, train_accuracy 62.610, val_accuracy 59.086, teI0522 12:38:40.666986 140346421790528 train.py:379] Early stopping!
+I0522 12:38:40.667408 140346421790528 train.py:425] Using Cuda
+I0522 12:38:53.309476 140346421790528 train.py:425] Using Cuda
+I0522 12:38:53.947741 140346421790528 train.py:425] Using Cuda
+train_loss 1.370; val_loss 1.447, train_accuracy 62.716, val_accuracy 59.167, teI0522 12:39:36.758720 140346421790528 train.py:425] Using Cuda
+I0522 12:39:49.474165 140346421790528 train.py:425] Using Cuda
+I0522 12:39:50.113456 140346421790528 train.py:425] Using Cuda
+train_loss 1.366; val_loss 1.445, train_accuracy 62.682, val_accuracy 59.174, teI0522 12:40:32.788296 140346421790528 train.py:425] Using Cuda
+I0522 12:40:45.586954 140346421790528 train.py:425] Using Cuda
+I0522 12:40:46.231521 140346421790528 train.py:425] Using Cuda
+train_loss 1.363; val_loss 1.443, train_accuracy 62.726, val_accuracy 59.324, teI0522 12:41:28.965165 140346421790528 train.py:425] Using Cuda
+I0522 12:41:41.976519 140346421790528 train.py:425] Using Cuda
+I0522 12:41:42.631844 140346421790528 train.py:425] Using Cuda
+train_loss 1.360; val_loss 1.442, train_accuracy 62.811, val_accuracy 58.777, teI0522 12:42:25.295125 140346421790528 train.py:425] Using Cuda
+I0522 12:42:37.914737 140346421790528 train.py:425] Using Cuda
+I0522 12:42:38.549778 140346421790528 train.py:425] Using Cuda
+train_loss 1.357; val_loss 1.440, train_accuracy 63.071, val_accuracy 59.224, teI0522 12:43:21.135286 140346421790528 train.py:425] Using Cuda
+I0522 12:43:33.804014 140346421790528 train.py:425] Using Cuda
+I0522 12:43:34.442597 140346421790528 train.py:425] Using Cuda
+train_loss 1.354; val_loss 1.439, train_accuracy 62.836, val_accuracy 59.298, teI0522 12:44:17.126619 140346421790528 train.py:425] Using Cuda
+I0522 12:44:29.794022 140346421790528 train.py:425] Using Cuda
+I0522 12:44:30.432141 140346421790528 train.py:425] Using Cuda
+train_loss 1.351; val_loss 1.438, train_accuracy 62.987, val_accuracy 59.255, teI0522 12:45:13.175985 140346421790528 train.py:425] Using Cuda
+I0522 12:45:25.995265 140346421790528 train.py:425] Using Cuda
+I0522 12:45:26.638935 140346421790528 train.py:425] Using Cuda
+train_loss 1.348; val_loss 1.436, train_accuracy 63.204, val_accuracy 59.528, teI0522 12:46:09.270589 140346421790528 train.py:425] Using Cuda
+I0522 12:46:22.324750 140346421790528 train.py:425] Using Cuda
+I0522 12:46:22.979730 140346421790528 train.py:425] Using Cuda
+train_loss 1.346; val_loss 1.435, train_accuracy 63.227, val_accuracy 59.343, teI0522 12:47:05.875869 140346421790528 train.py:425] Using Cuda
+I0522 12:47:18.558738 140346421790528 train.py:425] Using Cuda
+I0522 12:47:19.200714 140346421790528 train.py:425] Using Cuda
+train_loss 1.343; val_loss 1.434, train_accuracy 63.194, val_accuracy 58.796, teI0522 12:48:02.114294 140346421790528 train.py:425] Using Cuda
+I0522 12:48:15.176948 140346421790528 train.py:425] Using Cuda
+I0522 12:48:15.832407 140346421790528 train.py:425] Using Cuda
+train_loss 1.341; val_loss 1.433, train_accuracy 63.342, val_accuracy 59.200, teI0522 12:48:58.692255 140346421790528 train.py:425] Using Cuda
+I0522 12:49:11.388582 140346421790528 train.py:425] Using Cuda
+I0522 12:49:12.022824 140346421790528 train.py:425] Using Cuda
+train_loss 1.339; val_loss 1.431, train_accuracy 63.389, val_accuracy 59.443, teI0522 12:49:54.511176 140346421790528 train.py:425] Using Cuda
+I0522 12:50:07.400269 140346421790528 train.py:425] Using Cuda
+I0522 12:50:08.045879 140346421790528 train.py:425] Using Cuda
+train_loss 1.337; val_loss 1.431, train_accuracy 63.243, val_accuracy 59.074, teI0522 12:50:51.096812 140346421790528 train.py:425] Using Cuda
+I0522 12:51:04.135561 140346421790528 train.py:425] Using Cuda
+I0522 12:51:04.791685 140346421790528 train.py:425] Using Cuda
+train_loss 1.334; val_loss 1.430, train_accuracy 63.256, val_accuracy 58.872, teI0522 12:51:47.943747 140346421790528 train.py:425] Using Cuda
+I0522 12:52:00.791025 140346421790528 train.py:425] Using Cuda
+I0522 12:52:01.430207 140346421790528 train.py:425] Using Cuda
+train_loss 1.332; val_loss 1.430, train_accuracy 63.155, val_accuracy 58.869, teI0522 12:52:44.133289 140346421790528 train.py:425] Using Cuda
+I0522 12:52:56.754696 140346421790528 train.py:425] Using Cuda
+I0522 12:52:57.391560 140346421790528 train.py:425] Using Cuda
+train_loss 1.330; val_loss 1.429, train_accuracy 63.380, val_accuracy 59.102, teI0522 12:53:40.153868 140346421790528 train.py:425] Using Cuda
+I0522 12:53:53.216889 140346421790528 train.py:425] Using Cuda
+I0522 12:53:53.872100 140346421790528 train.py:425] Using Cuda
+train_loss 1.329; val_loss 1.428, train_accuracy 63.605, val_accuracy 59.314, teI0522 12:54:36.743682 140346421790528 train.py:425] Using Cuda
+I0522 12:54:49.431090 140346421790528 train.py:425] Using Cuda
+I0522 12:54:50.070791 140346421790528 train.py:425] Using Cuda
+train_loss 1.327; val_loss 1.427, train_accuracy 63.511, val_accuracy 59.345, teI0522 12:55:32.832549 140346421790528 train.py:425] Using Cuda
+I0522 12:55:45.919131 140346421790528 train.py:425] Using Cuda
+I0522 12:55:46.597144 140346421790528 train.py:425] Using Cuda
+train_loss 1.325; val_loss 1.426, train_accuracy 63.496, val_accuracy 59.421, teI0522 12:56:33.485269 140346421790528 train.py:425] Using Cuda
+I0522 12:56:46.724505 140346421790528 train.py:425] Using Cuda
+I0522 12:56:47.420146 140346421790528 train.py:425] Using Cuda
+train_loss 1.323; val_loss 1.426, train_accuracy 63.589, val_accuracy 59.122, teI0522 12:57:34.523067 140346421790528 train.py:425] Using Cuda
+I0522 12:57:47.595365 140346421790528 train.py:425] Using Cuda
+I0522 12:57:48.234049 140346421790528 train.py:425] Using Cuda
+train_loss 1.321; val_loss 1.425, train_accuracy 63.646, val_accuracy 59.364, teI0522 12:58:36.230683 140346421790528 train.py:379] Early stopping!
+I0522 12:58:36.231224 140346421790528 train.py:425] Using Cuda
+I0522 12:58:49.799850 140346421790528 train.py:425] Using Cuda
+I0522 12:58:50.546810 140346421790528 train.py:425] Using Cuda
+train_loss 1.320; val_loss 1.424, train_accuracy 63.662, val_accuracy 59.345, teI0522 12:59:35.514630 140346421790528 train.py:425] Using Cuda
+I0522 12:59:48.173697 140346421790528 train.py:425] Using Cuda
+I0522 12:59:48.810767 140346421790528 train.py:425] Using Cuda
+train_loss 1.318; val_loss 1.424, train_accuracy 63.474, val_accuracy 59.257, teI0522 13:00:31.684010 140346421790528 train.py:425] Using Cuda
+I0522 13:00:44.593081 140346421790528 train.py:425] Using Cuda
+I0522 13:00:45.246656 140346421790528 train.py:425] Using Cuda
+train_loss 1.317; val_loss 1.423, train_accuracy 63.645, val_accuracy 59.340, teI0522 13:01:28.632932 140346421790528 train.py:425] Using Cuda
+I0522 13:01:41.507185 140346421790528 train.py:425] Using Cuda
+I0522 13:01:42.161213 140346421790528 train.py:425] Using Cuda
+train_loss 1.315; val_loss 1.422, train_accuracy 63.708, val_accuracy 59.031, teI0522 13:02:25.408632 140346421790528 train.py:425] Using Cuda
+I0522 13:02:38.607409 140346421790528 train.py:425] Using Cuda
+I0522 13:02:39.295830 140346421790528 train.py:425] Using Cuda
+train_loss 1.314; val_loss 1.422, train_accuracy 63.564, val_accuracy 59.112, teI0522 13:03:23.254039 140346421790528 train.py:425] Using Cuda
+I0522 13:03:35.892271 140346421790528 train.py:425] Using Cuda
+I0522 13:03:36.528665 140346421790528 train.py:425] Using Cuda
+train_loss 1.312; val_loss 1.421, train_accuracy 63.911, val_accuracy 59.762, teI0522 13:04:19.585727 140346421790528 train.py:425] Using Cuda
+I0522 13:04:32.669905 140346421790528 train.py:425] Using Cuda
+I0522 13:04:33.328837 140346421790528 train.py:425] Using Cuda
+train_loss 1.311; val_loss 1.421, train_accuracy 63.684, val_accuracy 59.417, teI0522 13:05:16.346444 140346421790528 train.py:425] Using Cuda
+I0522 13:05:29.264330 140346421790528 train.py:425] Using Cuda
+I0522 13:05:29.902158 140346421790528 train.py:425] Using Cuda
+train_loss 1.310; val_loss 1.420, train_accuracy 63.664, val_accuracy 59.329, teI0522 13:06:13.255652 140346421790528 train.py:425] Using Cuda
+I0522 13:06:25.995113 140346421790528 train.py:425] Using Cuda
+I0522 13:06:26.638218 140346421790528 train.py:425] Using Cuda
+train_loss 1.308; val_loss 1.420, train_accuracy 63.668, val_accuracy 58.984, teI0522 13:07:09.293425 140346421790528 train.py:379] Early stopping!
+I0522 13:07:09.294001 140346421790528 train.py:425] Using Cuda
+I0522 13:07:22.014130 140346421790528 train.py:425] Using Cuda
+I0522 13:07:22.655133 140346421790528 train.py:425] Using Cuda
+train_loss 1.307; val_loss 1.420, train_accuracy 63.601, val_accuracy 59.110, teI0522 13:08:05.948883 140346421790528 train.py:425] Using Cuda
+I0522 13:08:18.669964 140346421790528 train.py:425] Using Cuda
+I0522 13:08:19.316087 140346421790528 train.py:425] Using Cuda
+train_loss 1.306; val_loss 1.419, train_accuracy 63.782, val_accuracy 59.102, teI0522 13:09:02.024812 140346421790528 train.py:379] Early stopping!
+I0522 13:09:02.025397 140346421790528 train.py:425] Using Cuda
+I0522 13:09:15.048792 140346421790528 train.py:425] Using Cuda
+I0522 13:09:15.700334 140346421790528 train.py:425] Using Cuda
+train_loss 1.304; val_loss 1.419, train_accuracy 64.013, val_accuracy 59.072, teI0522 13:09:58.574973 140346421790528 train.py:425] Using Cuda
+I0522 13:10:11.534242 140346421790528 train.py:425] Using Cuda
+I0522 13:10:12.181386 140346421790528 train.py:425] Using Cuda
+train_loss 1.303; val_loss 1.419, train_accuracy 63.805, val_accuracy 59.136, teI0522 13:10:54.770057 140346421790528 train.py:379] Early stopping!
+I0522 13:10:54.770662 140346421790528 train.py:425] Using Cuda
+I0522 13:11:07.726756 140346421790528 train.py:425] Using Cuda
+I0522 13:11:08.366855 140346421790528 train.py:425] Using Cuda
+train_loss 1.302; val_loss 1.418, train_accuracy 63.755, val_accuracy 59.198, teI0522 13:11:51.141275 140346421790528 train.py:425] Using Cuda
+I0522 13:12:03.758543 140346421790528 train.py:425] Using Cuda
+I0522 13:12:04.394200 140346421790528 train.py:425] Using Cuda
+train_loss 1.301; val_loss 1.418, train_accuracy 63.864, val_accuracy 59.405, teI0522 13:12:47.056728 140346421790528 train.py:425] Using Cuda
+I0522 13:12:59.671667 140346421790528 train.py:425] Using Cuda
+I0522 13:13:00.307468 140346421790528 train.py:425] Using Cuda
+train_loss 1.300; val_loss 1.417, train_accuracy 63.934, val_accuracy 59.295, teI0522 13:13:42.746480 140346421790528 train.py:379] Early stopping!
+I0522 13:13:42.747102 140346421790528 train.py:425] Using Cuda
+I0522 13:13:55.364156 140346421790528 train.py:425] Using Cuda
+I0522 13:13:55.999915 140346421790528 train.py:425] Using Cuda
+train_loss 1.299; val_loss 1.417, train_accuracy 63.986, val_accuracy 59.497, teI0522 13:14:38.808928 140346421790528 train.py:425] Using Cuda
+I0522 13:14:51.428065 140346421790528 train.py:425] Using Cuda
+I0522 13:14:52.064678 140346421790528 train.py:425] Using Cuda
+train_loss 1.298; val_loss 1.417, train_accuracy 63.736, val_accuracy 59.117, teI0522 13:15:34.777002 140346421790528 train.py:425] Using Cuda
+I0522 13:15:47.844690 140346421790528 train.py:425] Using Cuda
+I0522 13:15:48.505206 140346421790528 train.py:425] Using Cuda
+train_loss 1.297; val_loss 1.416, train_accuracy 64.009, val_accuracy 59.531, teI0522 13:16:31.809541 140346421790528 train.py:425] Using Cuda
+I0522 13:16:44.569430 140346421790528 train.py:425] Using Cuda
+I0522 13:16:45.209176 140346421790528 train.py:425] Using Cuda
+train_loss 1.296; val_loss 1.416, train_accuracy 64.025, val_accuracy 59.571, teI0522 13:17:28.123054 140346421790528 train.py:425] Using Cuda
+I0522 13:17:41.109350 140346421790528 train.py:425] Using Cuda
+I0522 13:17:41.763324 140346421790528 train.py:425] Using Cuda
+train_loss 1.295; val_loss 1.416, train_accuracy 64.230, val_accuracy 59.652, teI0522 13:18:24.540915 140346421790528 train.py:425] Using Cuda
+I0522 13:18:37.174132 140346421790528 train.py:425] Using Cuda
+I0522 13:18:37.809855 140346421790528 train.py:425] Using Cuda
+train_loss 1.294; val_loss 1.415, train_accuracy 64.028, val_accuracy 59.393, teI0522 13:19:20.476264 140346421790528 train.py:425] Using Cuda
+I0522 13:19:33.110582 140346421790528 train.py:425] Using Cuda
+I0522 13:19:33.748380 140346421790528 train.py:425] Using Cuda
+train_loss 1.293; val_loss 1.415, train_accuracy 64.030, val_accuracy 59.093, teI0522 13:20:16.273780 140346421790528 train.py:425] Using Cuda
+I0522 13:20:29.364587 140346421790528 train.py:425] Using Cuda
+I0522 13:20:30.020086 140346421790528 train.py:425] Using Cuda
+train_loss 1.292; val_loss 1.415, train_accuracy 64.096, val_accuracy 59.200, teI0522 13:21:13.145660 140346421790528 train.py:425] Using Cuda
+I0522 13:21:25.901653 140346421790528 train.py:425] Using Cuda
+I0522 13:21:26.542748 140346421790528 train.py:425] Using Cuda
+train_loss 1.291; val_loss 1.415, train_accuracy 64.127, val_accuracy 59.041, teI0522 13:22:09.430778 140346421790528 train.py:425] Using Cuda
+I0522 13:22:22.239536 140346421790528 train.py:425] Using Cuda
+I0522 13:22:22.892656 140346421790528 train.py:425] Using Cuda
+train_loss 1.290; val_loss 1.414, train_accuracy 64.406, val_accuracy 59.333, teI0522 13:23:05.728075 140346421790528 train.py:425] Using Cuda
+I0522 13:23:18.807703 140346421790528 train.py:425] Using Cuda
+I0522 13:23:19.464226 140346421790528 train.py:425] Using Cuda
+train_loss 1.289; val_loss 1.414, train_accuracy 64.078, val_accuracy 59.447, teI0522 13:24:02.443955 140346421790528 train.py:425] Using Cuda
+I0522 13:24:15.415056 140346421790528 train.py:425] Using Cuda
+I0522 13:24:16.068928 140346421790528 train.py:425] Using Cuda
+train_loss 1.289; val_loss 1.414, train_accuracy 64.129, val_accuracy 59.514, teI0522 13:24:58.992166 140346421790528 train.py:425] Using Cuda
+I0522 13:25:12.064293 140346421790528 train.py:425] Using Cuda
+I0522 13:25:12.722530 140346421790528 train.py:425] Using Cuda
+train_loss 1.288; val_loss 1.414, train_accuracy 64.009, val_accuracy 59.102, teI0522 13:25:55.837499 140346421790528 train.py:425] Using Cuda
+I0522 13:26:08.933676 140346421790528 train.py:425] Using Cuda
+I0522 13:26:09.591012 140346421790528 train.py:425] Using Cuda
+train_loss 1.287; val_loss 1.413, train_accuracy 64.476, val_accuracy 59.652, teI0522 13:26:52.574159 140346421790528 train.py:425] Using Cuda
+I0522 13:27:05.506082 140346421790528 train.py:425] Using Cuda
+I0522 13:27:06.159920 140346421790528 train.py:425] Using Cuda
+train_loss 1.286; val_loss 1.413, train_accuracy 63.941, val_accuracy 59.376, teI0522 13:27:49.123278 140346421790528 train.py:425] Using Cuda
+I0522 13:28:02.087064 140346421790528 train.py:425] Using Cuda
+I0522 13:28:02.727666 140346421790528 train.py:425] Using Cuda
+train_loss 1.285; val_loss 1.413, train_accuracy 64.179, val_accuracy 59.726, teI0522 13:28:45.577066 140346421790528 train.py:425] Using Cuda
+I0522 13:28:58.556867 140346421790528 train.py:425] Using Cuda
+I0522 13:28:59.197787 140346421790528 train.py:425] Using Cuda
+train_loss 1.285; val_loss 1.412, train_accuracy 64.102, val_accuracy 59.112, teI0522 13:29:41.975696 140346421790528 train.py:425] Using Cuda
+I0522 13:29:54.763544 140346421790528 train.py:425] Using Cuda
+I0522 13:29:55.405861 140346421790528 train.py:425] Using Cuda
+train_loss 1.284; val_loss 1.412, train_accuracy 64.042, val_accuracy 59.531, teI0522 13:30:38.178618 140346421790528 train.py:425] Using Cuda
+I0522 13:30:50.871230 140346421790528 train.py:425] Using Cuda
+I0522 13:30:51.526878 140346421790528 train.py:425] Using Cuda
+train_loss 1.283; val_loss 1.412, train_accuracy 64.228, val_accuracy 59.348, teI0522 13:31:34.462137 140346421790528 train.py:425] Using Cuda
+I0522 13:31:47.404912 140346421790528 train.py:425] Using Cuda
+I0522 13:31:48.057604 140346421790528 train.py:425] Using Cuda
+train_loss 1.283; val_loss 1.412, train_accuracy 64.105, val_accuracy 59.586, teI0522 13:32:31.105527 140346421790528 train.py:425] Using Cuda
+I0522 13:32:44.137047 140346421790528 train.py:425] Using Cuda
+I0522 13:32:44.797328 140346421790528 train.py:425] Using Cuda
+train_loss 1.282; val_loss 1.411, train_accuracy 64.356, val_accuracy 59.704, teI0522 13:33:27.898216 140346421790528 train.py:425] Using Cuda
+I0522 13:33:40.799844 140346421790528 train.py:425] Using Cuda
+I0522 13:33:41.454630 140346421790528 train.py:425] Using Cuda
+train_loss 1.281; val_loss 1.411, train_accuracy 64.299, val_accuracy 59.217, teI0522 13:34:24.304890 140346421790528 train.py:425] Using Cuda
+I0522 13:34:36.923946 140346421790528 train.py:425] Using Cuda
+I0522 13:34:37.559128 140346421790528 train.py:425] Using Cuda
+train_loss 1.280; val_loss 1.411, train_accuracy 64.168, val_accuracy 59.647, teI0522 13:35:20.283181 140346421790528 train.py:425] Using Cuda
+I0522 13:35:33.379492 140346421790528 train.py:425] Using Cuda
+I0522 13:35:34.033386 140346421790528 train.py:425] Using Cuda
+train_loss 1.280; val_loss 1.411, train_accuracy 64.274, val_accuracy 59.267, teI0522 13:36:17.099335 140346421790528 train.py:425] Using Cuda
+I0522 13:36:30.181304 140346421790528 train.py:425] Using Cuda
+I0522 13:36:30.838546 140346421790528 train.py:425] Using Cuda
+train_loss 1.279; val_loss 1.410, train_accuracy 64.265, val_accuracy 59.716, teI0522 13:37:13.934511 140346421790528 train.py:425] Using Cuda
+I0522 13:37:26.684544 140346421790528 train.py:425] Using Cuda
+I0522 13:37:27.324891 140346421790528 train.py:425] Using Cuda
+train_loss 1.278; val_loss 1.410, train_accuracy 64.591, val_accuracy 59.731, teI0522 13:38:10.216560 140346421790528 train.py:425] Using Cuda
+I0522 13:38:23.207155 140346421790528 train.py:425] Using Cuda
+I0522 13:38:23.845510 140346421790528 train.py:425] Using Cuda
+train_loss 1.278; val_loss 1.410, train_accuracy 64.134, val_accuracy 59.267, teI0522 13:39:06.887995 140346421790528 train.py:425] Using Cuda
+I0522 13:39:19.631507 140346421790528 train.py:425] Using Cuda
+I0522 13:39:20.272311 140346421790528 train.py:425] Using Cuda
+train_loss 1.277; val_loss 1.410, train_accuracy 64.284, val_accuracy 59.205, teI0522 13:40:03.317617 140346421790528 train.py:425] Using Cuda
+I0522 13:40:16.086303 140346421790528 train.py:425] Using Cuda
+I0522 13:40:16.728664 140346421790528 train.py:425] Using Cuda
+train_loss 1.277; val_loss 1.410, train_accuracy 64.246, val_accuracy 59.348, teI0522 13:40:59.860908 140346421790528 train.py:425] Using Cuda
+I0522 13:41:12.644801 140346421790528 train.py:425] Using Cuda
+I0522 13:41:13.285193 140346421790528 train.py:425] Using Cuda
+train_loss 1.276; val_loss 1.410, train_accuracy 64.360, val_accuracy 59.726, teI0522 13:41:56.291193 140346421790528 train.py:425] Using Cuda
+I0522 13:42:09.249012 140346421790528 train.py:425] Using Cuda
+I0522 13:42:09.901926 140346421790528 train.py:425] Using Cuda
+train_loss 1.275; val_loss 1.409, train_accuracy 64.212, val_accuracy 59.345, teI0522 13:42:53.558682 140346421790528 train.py:425] Using Cuda
+I0522 13:43:06.521743 140346421790528 train.py:425] Using Cuda
+I0522 13:43:07.160941 140346421790528 train.py:425] Using Cuda
+train_loss 1.275; val_loss 1.409, train_accuracy 64.385, val_accuracy 59.393, teI0522 13:43:49.916099 140346421790528 train.py:425] Using Cuda
+I0522 13:44:03.164680 140346421790528 train.py:425] Using Cuda
+I0522 13:44:03.823094 140346421790528 train.py:425] Using Cuda
+train_loss 1.274; val_loss 1.409, train_accuracy 64.477, val_accuracy 59.486, teI0522 13:44:49.553418 140346421790528 train.py:425] Using Cuda
+I0522 13:45:03.033021 140346421790528 train.py:425] Using Cuda
+I0522 13:45:03.703977 140346421790528 train.py:425] Using Cuda
+train_loss 1.274; val_loss 1.409, train_accuracy 64.507, val_accuracy 59.576, teI0522 13:45:48.394328 140346421790528 train.py:425] Using Cuda
+I0522 13:46:01.826280 140346421790528 train.py:425] Using Cuda
+I0522 13:46:02.492122 140346421790528 train.py:425] Using Cuda
+train_loss 1.273; val_loss 1.409, train_accuracy 64.360, val_accuracy 59.383, te
+I0522 13:46:07.612763 140346421790528 train.py:425] Using Cuda
+Final test accuracy: tensor(58.4591, device='cuda:0')
+
