@@ -584,7 +584,7 @@ if __name__ == '__main__':
     flags.DEFINE_enum('loss', 'CrossEntropyLoss', [
                       'CrossEntropyLoss', 'CTCLoss'], 'The name of loss function')
 
-    flags.DEFINE_float('labeled_p', 0.5, 'Labeled percentage of data')
+    flags.DEFINE_float('labeled_p', 1.0, 'Labeled percentage of data')
     flags.DEFINE_integer('batch_size', 1, 'The batch size')
     flags.DEFINE_enum('method', 'baseline', [
                       'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
