@@ -97,7 +97,7 @@ class MeanTeacher(nn.Module):
         return min(float(self.step) / self.max_steps, 1.0)
 
     def update_rampup(self, epoch, rampup_length):
-        self.consistency_weight = sigmoid_rampup(epoch, rampup_length)
+        self.consistency_weight = self.sigmoid_rampup(epoch, rampup_length)
 
     def sigmoid_rampup(current, rampup_length):
         current = np.clip(current, 0.0, rampup_length)
