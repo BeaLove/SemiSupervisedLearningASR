@@ -6,7 +6,7 @@ class ExponetialMovingAverage(object):
         self.ema_model = ema_model
         self.alpha = alpha
 
-        for ema_param in self.ema_model.parameters()):
+        for ema_param in self.ema_model.parameters():
             ema_param.detach_()
 
     def step(self):
