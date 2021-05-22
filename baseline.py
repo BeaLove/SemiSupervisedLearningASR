@@ -48,9 +48,10 @@ class Baseline(nn.Module):
         return torch.squeeze(self.model(x), dim=1)
 
     def loss_fn(self, device, sample, targets):
-
+        if targets is None:
+            return torch.tensor([0.0], requires_grad=True)
+        
         sample, targets = sample.to(device), targets.to(device)
-
         return self.loss(self.forward(sample), targets)
 
     def train_step(self, loss_val):

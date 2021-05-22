@@ -309,6 +309,8 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
                          mfccs=FLAGS.num_ceps, output_phonemes=corpus.get_phones_len(),
                          units_per_layer=FLAGS.num_hidden, num_layers=FLAGS.num_layers,
                          dropout=FLAGS.dropout, optimizer=FLAGS.optimizer, lr=FLAGS.lr)
+        train_targets[0:val_split] = get_targets(
+            train_targets[0:val_split], p=FLAGS.labeled_p)
     else:
         raise Exception('Wrong flag for method')
     model.to(device)
@@ -322,11 +324,9 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         if not(t is None):
             count_labeled_samples += 1
         else:
-            count_unlabeled_samples
+            count_unlabeled_samples +=1
 
     logging.info("Labeled samples: {}".format(count_labeled_samples))
-    logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
-
     logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
 
     bar = tqdm(range(num_epochs))
@@ -584,7 +584,7 @@ if __name__ == '__main__':
     flags.DEFINE_enum('loss', 'CrossEntropyLoss', [
                       'CrossEntropyLoss', 'CTCLoss'], 'The name of loss function')
 
-    flags.DEFINE_float('labeled_p', 0.1, 'Labeled percentage of data')
+    flags.DEFINE_float('labeled_p', 0.5, 'Labeled percentage of data')
     flags.DEFINE_integer('batch_size', 1, 'The batch size')
     flags.DEFINE_enum('method', 'baseline', [
                       'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
