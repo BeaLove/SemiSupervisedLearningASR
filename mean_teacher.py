@@ -37,8 +37,6 @@ class MeanTeacher(nn.Module):
         self.std = 0.15  # Need to check
         self.mean = 0.0
 
-        self.update_rampup()
-
         self.loss_consistency = nn.MSELoss()
         self.loss_class = nn.CrossEntropyLoss()
 
