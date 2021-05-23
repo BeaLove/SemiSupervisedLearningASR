@@ -363,7 +363,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
             train_losses.append(loss_val.item())
 
-        avg_train_losses.append(sum(train_losses)/count_labeled_samples))
+        avg_train_losses.append(sum(train_losses)/count_labeled_samples)
 
         model.eval()
         for i in range(val_split, num_data):
