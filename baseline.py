@@ -52,7 +52,9 @@ class Baseline(nn.Module):
             return torch.tensor([0.0], requires_grad=True)
         
         sample, targets = sample.to(device), targets.to(device)
-        return self.loss(self.forward(sample), targets)
+        loss = self.loss(self.forward(sample), targets)
+        print('loss', loss)
+        return loss
 
     def train_step(self, loss_val):
         loss_val.backward()
