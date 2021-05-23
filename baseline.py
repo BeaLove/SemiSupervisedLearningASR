@@ -53,7 +53,7 @@ class Baseline(nn.Module):
         
         sample, targets = sample.to(device), targets.to(device)
         loss = self.loss(self.forward(sample), targets)
-        print('loss', loss)
+        #print('loss', loss)
         return loss
 
     def train_step(self, loss_val):
