@@ -47,6 +47,10 @@ class Baseline(nn.Module):
     def forward(self, x):
         return torch.squeeze(self.model(x), dim=1)
 
+
+    def loss_fn_class(self, device, sample, targets):
+        return self.loss_fn(device, sample, targets)
+
     def loss_fn(self, device, sample, targets):
         if targets is None:
             return torch.tensor([-1.0], requires_grad=True)

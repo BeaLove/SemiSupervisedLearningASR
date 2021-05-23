@@ -10,6 +10,7 @@ from torch.autograd import Variable
 
 from optimizers.AdaNormGrad import AdamNormGrad
 
+
 class MeanTeacher(nn.Module):
 
     # Problems?
@@ -30,7 +31,7 @@ class MeanTeacher(nn.Module):
         self.name = 'MeanTeacher'
         self.consistency_weight = consistency_weight
         self.current_consistency_weight = 0
-        
+
         self.max_steps = max_steps
         self.step = 0
 
@@ -41,9 +42,9 @@ class MeanTeacher(nn.Module):
         self.loss_class = nn.CrossEntropyLoss()
 
         self.student = self.model = LSTM(mfccs, output_phonemes, units_per_layer,
-                          num_layers, dropout, name='student.pth')
+                                         num_layers, dropout, name='student.pth')
         self.teacher = self.model = LSTM(mfccs, output_phonemes, units_per_layer,
-                          num_layers, dropout, name='teacher.pth')
+                                         num_layers, dropout, name='teacher.pth')
 
         self.teacher.load_state_dict(self.student.state_dict())
 
@@ -57,7 +58,6 @@ class MeanTeacher(nn.Module):
         else:
             # Configuring the Optimizer (ADAptive Moments but with normalizing gradients)
             self.optimizer = AdamNormGrad(self.student.parameters(), lr=lr)
-
 
     def to(self, device):
         self.student = self.student.to(device)
@@ -75,6 +75,15 @@ class MeanTeacher(nn.Module):
     def forward(self, x):
         return self.forward_student(x)
 
+    def loss_fn_class(self, device, sample, targets):
+        sample = sample.to(device)
+
+        if not(targets is None):
+            targets = targets.to(device)
+            return self.loss_class(self.forward_student(sample), targets)
+        else:
+            return torch.tensor([-1.0], requires_grad=True)
+
     def loss_fn(self, device, sample, targets):
         loss = 0
 
@@ -87,7 +96,7 @@ class MeanTeacher(nn.Module):
             #print('loss after cross entropy', loss)
 
         loss += self.current_consistency_weight * self.loss_consistency(self.forward_student(sample + torch.randn(sample.size()).to(device) * self.std),
-                                                                self.forward_teacher(sample + torch.randn(sample.size()).to(device) * self.std))
+                                                                        self.forward_teacher(sample + torch.randn(sample.size()).to(device) * self.std))
         #print('loss after consistency', loss)
 
         return loss
@@ -101,7 +110,8 @@ class MeanTeacher(nn.Module):
         return min(float(self.step) / self.max_steps, 1.0)
 
     def update_rampup(self, epoch, rampup_length):
-        self.current_consistency_weight = self.consistency_weight * self.sigmoid_rampup(epoch, rampup_length)
+        self.current_consistency_weight = self.consistency_weight * \
+            self.sigmoid_rampup(epoch, rampup_length)
 
     def sigmoid_rampup(self, current, rampup_length):
         current = np.clip(current, 0.0, rampup_length)
