@@ -84,9 +84,11 @@ class MeanTeacher(nn.Module):
             targets = targets.to(device)
             loss += self.loss_class(self.forward_student(sample +
                                     torch.randn(sample.size()).to(device) * self.std), targets)
+            print('loss after cross entropy', loss)
 
         loss += self.current_consistency_weight * self.loss_consistency(self.forward_student(sample + torch.randn(sample.size()).to(device) * self.std),
                                                                 self.forward_teacher(sample + torch.randn(sample.size()).to(device) * self.std))
+        print('loss after consistency', loss)
 
         return loss
 
