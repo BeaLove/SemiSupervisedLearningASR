@@ -340,11 +340,8 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         if FLAGS.method == 'mean_teacher':
             model.update_rampup(epoch, FLAGS.consistency_rampup)
 
-        train_losses = []
-        val_losses = []
-
         for i in range(0, val_split, FLAGS.batch_size):
-
+        
             loss_val = 0
             optimizer.zero_grad()
 
@@ -362,12 +359,11 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
                 result = model.loss_fn(device, sample, target)
                 loss_val += result
 
-                if not(target is None):
-                    train_losses.append(result.item())
-
             model.train_step(loss_val)
 
-        avg_train_losses.append(np.average(train_losses))
+            train_losses.append(loss_val.item())
+
+        avg_train_losses.append(sum(train_losses)/count_labeled_samples)
 
         model.eval()
         for i in range(val_split, num_data):
@@ -394,7 +390,8 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
             else:
                 continue
 
-        avg_val_losses.append(np.average(val_losses))
+        avg_val_loss = np.average(val_losses)
+        avg_val_losses.append(avg_val_loss)
         model.train()
 
         accuracy1 = testModel(
