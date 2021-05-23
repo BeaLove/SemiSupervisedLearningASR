@@ -36,6 +36,7 @@ from mean_teacher import MeanTeacher
 from absl import logging
 logging.set_verbosity(logging.INFO)
 
+
 FLAGS = flags.FLAGS
 
 
@@ -45,6 +46,8 @@ def main(argv):
     del argv  # Unused.
 
     set_seeds(0)
+
+    #logging.get_absl_handler().use_absl_log_file(os.path.join(os.path.abspath(FLAGS.results_save_dir), 'logging'), './') 
 
     logging.info("Method: {}".format(FLAGS.method))
     logging.info("labeled_p: {}".format(FLAGS.labeled_p))
@@ -329,6 +332,8 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
     logging.info("Labeled samples: {}".format(count_labeled_samples))
     logging.info("Unlabeled samples: {}".format(count_unlabeled_samples))
 
+    logging.info("val_out: {}".format(num_data - val_split))
+
     bar = tqdm(range(num_epochs))
     for epoch in bar:
 
@@ -358,7 +363,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
             train_losses.append(loss_val.item())
 
-        avg_train_losses.append(np.average(train_losses))
+        avg_train_losses.append(sum(train_losses)/count_labeled_samples))
 
         model.eval()
         for i in range(val_split, num_data):
