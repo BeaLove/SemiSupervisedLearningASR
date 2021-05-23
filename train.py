@@ -343,6 +343,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         for i in range(0, val_split, FLAGS.batch_size):
 
             loss_val = 0
+            loss_val_plot = 0
             optimizer.zero_grad()
 
             for batch_idx in range(i, min(val_split, i + FLAGS.batch_size)):  # pen and papper
@@ -356,12 +357,13 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
                 if not(target is None):
                     target = target.type(torch.LongTensor)
 
-                result = model.loss_fn(device, sample, target)
-                loss_val += result
+                loss_val += model.loss_fn(device, sample, target)
+                loss_val_plot += model.loss_fn_class(device, sample, target)
 
             model.train_step(loss_val)
-            if(loss_val.item() != -1):
-                train_losses.append(loss_val.item())
+
+            if(loss_val_plot.item() != -1):
+                train_losses.append(loss_val_plot.item())
 
         loss_train_avg = np.average(train_losses)
         avg_train_losses.append(loss_train_avg)
