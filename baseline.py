@@ -49,7 +49,7 @@ class Baseline(nn.Module):
 
     def loss_fn(self, device, sample, targets):
         if targets is None:
-            return torch.tensor([0.0], requires_grad=True)
+            return torch.tensor([-1.0], requires_grad=True)
         
         sample, targets = sample.to(device), targets.to(device)
         loss = self.loss(self.forward(sample), targets)

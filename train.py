@@ -341,7 +341,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
             model.update_rampup(epoch, FLAGS.consistency_rampup)
 
         for i in range(0, val_split, FLAGS.batch_size):
-        
+
             loss_val = 0
             optimizer.zero_grad()
 
@@ -360,10 +360,11 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
                 loss_val += result
 
             model.train_step(loss_val)
+            if(loss_val.item() != -1):
+                train_losses.append(loss_val.item())
 
-            train_losses.append(loss_val.item())
-
-        avg_train_losses.append(sum(train_losses)/count_labeled_samples)
+        loss_train_avg = np.average(train_losses)
+        avg_train_losses.append(loss_train_avg)
 
         model.eval()
         for i in range(val_split, num_data):
@@ -404,8 +405,8 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
         test_accuracies.append(accuracy3)
 
         bar.set_description(
-            'train_loss {:.3f}; val_loss {:.3f}, train_accuracy {:.3f}, val_accuracy {:.3f}, test_accuracy {:.3f}'.format(
-                avg_train_losses[-1], avg_val_losses[-1], train_accuracies[-1], val_accuracies[-1], test_accuracies[-1])
+            'epoch {:.3f}; train_loss {:.3f}; val_loss {:.3f}, train_accuracy {:.3f}, val_accuracy {:.3f}, test_accuracy {:.3f}'.format(
+                float(epoch), avg_train_losses[-1], avg_val_losses[-1], train_accuracies[-1], val_accuracies[-1], test_accuracies[-1])
         )
 
         if epoch > 0 and epoch % 10 == 0:
@@ -585,14 +586,14 @@ if __name__ == '__main__':
     flags.DEFINE_integer('frame_len', 20, 'Frame length in ms')
     flags.DEFINE_integer('frame_shift', 10, 'frame shift in ms')
 
-    flags.DEFINE_integer('num_epochs', 2, 'Number of epochs')
+    flags.DEFINE_integer('num_epochs', 10, 'Number of epochs')
     flags.DEFINE_float('lr', 0.001, 'Learning rate')
 
     flags.DEFINE_string('name', 'vanillaLSTMfullylabeled.pth', 'name of model')
     flags.DEFINE_enum('loss', 'CrossEntropyLoss', [
                       'CrossEntropyLoss', 'CTCLoss'], 'The name of loss function')
 
-    flags.DEFINE_float('labeled_p', 0.95, 'Labeled percentage of data')
+    flags.DEFINE_float('labeled_p', 0.3, 'Labeled percentage of data')
     flags.DEFINE_integer('batch_size', 1, 'The batch size')
     flags.DEFINE_enum('method', 'baseline', [
                       'baseline', 'mean_teacher'], 'The method: baseline, mean_teacher.')
@@ -600,7 +601,7 @@ if __name__ == '__main__':
                        'The consistency weight for the mean teacher loss.')
     flags.DEFINE_integer('consistency_rampup', 5,
                          'The rampup for the consistency weight')
-    flags.DEFINE_enum('optimizer', 'AdamNormGrad', [
+    flags.DEFINE_enum('optimizer', 'Adam', [
                       'Adam', 'AdamNormGrad'], 'The optimizer: Adam, AdamNormGrad (Adam with normalizing gradients)')
     flags.DEFINE_integer('num_hidden', 100, 'Size of hidden layer.')
     flags.DEFINE_integer('num_layers', 1, 'The number of layers.')
