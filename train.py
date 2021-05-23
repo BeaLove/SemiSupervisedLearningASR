@@ -375,7 +375,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
             sample = torch.reshape(
                 sample, (sample.shape[0], 1, sample.shape[1]))
 
-            loss_val = model.loss_fn(device, sample, target)
+            loss_val = model.loss_fn_class(device, sample, target)
             # loss_val = loss_fn(model, loss, device, sample, target)
             val_losses.append(loss_val.item())
 
