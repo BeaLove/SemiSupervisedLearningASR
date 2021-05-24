@@ -610,5 +610,5 @@ if __name__ == '__main__':
     flags.DEFINE_float(
         'dropout', 0.1, 'If non-zero, introduces a Dropout layer on the outputs of each LSTM layer except the last layer, with dropout probability equal to dropout')
 
-    flag.DEFINE_string('gpu_device', 'cuda:0', 'The name of the GPU device')
+    flags.DEFINE_string('gpu_device', 'cuda:0', 'The name of the GPU device')
     app.run(main)
