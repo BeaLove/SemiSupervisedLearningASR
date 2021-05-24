@@ -284,7 +284,7 @@ def trainModel(train_data, train_targets, test_data, test_targets, num_data, num
 
     if torch.cuda.is_available():
         logging.info("Using Cuda")
-        device = torch.device('cuda:0')
+        device = torch.device(FLAGS.gpu_device)
     else:
         logging.info("Using cpu")
         device = torch.device('cpu')
@@ -433,7 +433,7 @@ def testModel(test_data, test_targets, num_data, model):
     total = 0
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:0')
+        device = torch.device(FLAGS.gpu_device)
     else:
         device = torch.device('cpu')
 
@@ -610,4 +610,5 @@ if __name__ == '__main__':
     flags.DEFINE_float(
         'dropout', 0.1, 'If non-zero, introduces a Dropout layer on the outputs of each LSTM layer except the last layer, with dropout probability equal to dropout')
 
+    flag.DEFINE_string('gpu_device', 'cuda:0', 'The name of the GPU device')
     app.run(main)
