@@ -1,0 +1,29 @@
+I0523 18:53:40.688944 140388036904768 train.py:52] Method: baseline
+I0523 18:53:40.689058 140388036904768 train.py:53] labeled_p: 0.1
+I0523 18:53:40.689110 140388036904768 train.py:54] num_epochs: 100
+I0523 18:53:40.689162 140388036904768 train.py:55] batch_size: 1
+I0523 18:53:40.689205 140388036904768 train.py:56] num_hidden: 100
+I0523 18:53:40.689260 140388036904768 train.py:57] num_layers: 1
+I0523 18:53:40.689301 140388036904768 train.py:58] dropout: 0.1
+I0523 18:53:40.689338 140388036904768 train.py:59] optimizer: Adam
+I0523 18:53:40.689376 140388036904768 train.py:60] lr: 0.001
+I0523 18:53:40.768684 140388036904768 train.py:116] Load MFCC coefficients from the directory tensors
+100%|█████████████████████████████████████| 4620/4620 [00:00<00:00, 9976.61it/s]
+100%|█████████████████████████████████████| 1680/1680 [00:00<00:00, 9875.91it/s]
+100%|████████████████████████████████████| 4620/4620 [00:00<00:00, 10752.48it/s]
+100%|████████████████████████████████████| 1680/1680 [00:00<00:00, 10772.84it/s]
+I0523 18:53:42.136767 140388036904768 train.py:286] Using Cuda
+I0523 18:53:44.383925 140388036904768 train.py:332] Labeled samples: 696
+I0523 18:53:44.384021 140388036904768 train.py:333] Unlabeled samples: 3924
+I0523 18:53:44.384067 140388036904768 train.py:335] val_out: 231
+epoch 5.000; train_loss 1.989; val_loss 2.060, train_accuracy 46.002, val_accuraI0523 18:55:24.551455 140388036904768 train.py:388] Early stopping!
+epoch 6.000; train_loss 1.956; val_loss 2.057, train_accuracy 46.327, val_accuraI0523 18:55:40.436387 140388036904768 train.py:388] Early stopping!
+epoch 10.000; train_loss 1.865; val_loss 2.027, train_accuracy 47.314, val_accurI0523 18:56:43.826921 140388036904768 train.py:388] Early stopping!
+epoch 16.000; train_loss 1.784; val_loss 2.011, train_accuracy 47.326, val_accurI0523 18:58:19.550627 140388036904768 train.py:388] Early stopping!
+epoch 18.000; train_loss 1.764; val_loss 2.009, train_accuracy 47.477, val_accurI0523 18:58:51.106336 140388036904768 train.py:388] Early stopping!
+epoch 20.000; train_loss 1.746; val_loss 2.008, train_accuracy 47.558, val_accurI0523 18:59:23.088854 140388036904768 train.py:388] Early stopping!
+epoch 25.000; train_loss 1.709; val_loss 2.008, train_accuracy 47.664, val_accurI0523 19:00:41.894675 140388036904768 train.py:388] Early stopping!
+epoch 30.000; train_loss 1.681; val_loss 2.009, train_accuracy 47.813, val_accurI0523 19:02:01.991954 140388036904768 train.py:388] Early stopping!
+epoch 71.000; train_loss 1.580; val_loss 2.029, train_accuracy 47.451, val_accurI0523 19:13:01.046543 140388036904768 train.py:388] Early stopping!
+epoch 99.000; train_loss 1.565; val_loss 2.034, train_accuracy 47.349, val_accur
+Final test accuracy: tensor(45.5936, device='cuda:0')
