@@ -1,9 +1,9 @@
 # SemiSupervisedLearningASR
 
-Experiments on semi-supervised learning for automatic speech recognition.
+Experiments on semi-supervised learning for automatic speech recognition. Utilizes the Mean Teacher model ("Mean Teachers are Better Role Models", Tarvainen & Valpola, 2017) as well as the "vanilla" soft-target semi-supervised learning method.
 
 Architectures:
-- LSTMs (maybe bi-directional) or RNN
+- LSTMs
 
 Dataset:
 - TIMIT
