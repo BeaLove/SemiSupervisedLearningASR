@@ -28,7 +28,7 @@ source activate venv
 
 ```bash
 conda create --name venv python=3.8 numpy scipy
-activate venv
+conda activate venv
 ```
 
 ### Install dependencies
